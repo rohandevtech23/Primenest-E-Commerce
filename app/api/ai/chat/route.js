@@ -23,13 +23,14 @@ export async function POST(request) {
         p.description,
         p.subcategory,
         c.name AS category,
-        pi.image_url AS image
+        COALESCE(
+          (SELECT image_url FROM product_images WHERE product_id = p.id AND is_primary = TRUE LIMIT 1),
+          (SELECT image_url FROM product_images WHERE product_id = p.id LIMIT 1)
+        ) AS image
       FROM products p
       JOIN categories c ON p.category_id = c.id
-      LEFT JOIN product_images pi ON p.id = pi.product_id AND pi.is_primary = TRUE
       WHERE p.stock > 0
       ORDER BY p.id ASC
-      LIMIT 50
     `);
 
     const catalog = productsRes.rows;
