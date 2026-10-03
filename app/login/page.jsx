@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { Mail, Lock, Eye, EyeOff, ArrowRight, Check, Sparkles, X } from "lucide-react";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTarget = searchParams.get("redirect") || "/";
@@ -697,5 +697,13 @@ export default function LoginPage() {
         </div>
       )}
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div style={{ minHeight: "100vh", background: "#09090b", display: "grid", placeItems: "center", color: "#d4af37" }}>Loading PrimeNest...</div>}>
+      <LoginForm />
+    </Suspense>
   );
 }

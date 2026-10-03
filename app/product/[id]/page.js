@@ -5,7 +5,9 @@ import { use, useEffect, useState } from "react";
 import { useCart } from "@/context/CartContext";
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
-import { ShoppingBag, Heart, Sparkles, ArrowUpRight, Check } from "lucide-react";
+import { ShoppingBag, Heart, Sparkles, ArrowUpRight, Check, Eye } from "lucide-react";
+import VirtualTryOnModal from "@/components/VirtualTryOnModal";
+import AIReviewSummarizer from "@/components/AIReviewSummarizer";
 
 export default function ProductPage({ params }) {
   const { id } = use(params);
@@ -20,6 +22,7 @@ export default function ProductPage({ params }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [addedRecently, setAddedRecently] = useState(false);
+  const [isTryOnOpen, setIsTryOnOpen] = useState(false);
 
   // Fetch product and related products from PostgreSQL through the API
   useEffect(() => {
@@ -447,6 +450,17 @@ export default function ProductPage({ params }) {
               </button>
             </div>
 
+            {/* AI VIRTUAL TRY-ON BUTTON */}
+            <button
+              type="button"
+              className="product-tryon-btn"
+              onClick={() => setIsTryOnOpen(true)}
+            >
+              <Sparkles size={16} className="tryon-sparkle" />
+              <span>Virtual Try-On</span>
+              <span className="tryon-ai-pill">✦ AI Neural Fit</span>
+            </button>
+
             {/* PERKS / TRUST PILLS */}
             <div className="product-perks">
               <div className="product-perk-item">
@@ -516,6 +530,17 @@ export default function ProductPage({ params }) {
             </div>
           </section>
         )}
+
+        {/* AI REVIEW SUMMARIZER */}
+        <AIReviewSummarizer productId={product.id} productName={product.name} />
+
+        {/* AI VIRTUAL TRY-ON MODAL */}
+        <VirtualTryOnModal
+          isOpen={isTryOnOpen}
+          onClose={() => setIsTryOnOpen(false)}
+          product={product}
+          onAddToCart={handleAddToCart}
+        />
       </main>
     </>
   );

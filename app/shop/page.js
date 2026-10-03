@@ -1,6 +1,6 @@
 
 "use client";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
@@ -97,7 +97,7 @@ const PREDEFINED_SUBCATEGORIES = {
   ],
 };
 
-export default function ShopPage() {
+function ShopContent() {
   const [products, setProducts] = useState([]);
   const [categoryList, setCategoryList] = useState([]);
   const [search, setSearch] = useState("");
@@ -727,5 +727,13 @@ const toSlug = (value) =>
         </section>
       </main>
     </>
+  );
+}
+
+export default function ShopPage() {
+  return (
+    <Suspense fallback={<div style={{ minHeight: "80vh", display: "grid", placeItems: "center", color: "#111" }}>Loading PrimeNest Collections...</div>}>
+      <ShopContent />
+    </Suspense>
   );
 }

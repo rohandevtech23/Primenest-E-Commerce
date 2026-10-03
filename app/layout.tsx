@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Playfair_Display, Cormorant_Garamond, Plus_Jakarta_Sans } from "next/font/google";
 import { WishlistProvider } from "@/context/WishlistContext";
 import { CartProvider } from "@/context/CartContext";
+import AIShoppingAssistant from "@/components/AIShoppingAssistant";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -64,6 +65,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <CartProvider>
           <WishlistProvider>
             {children}
+            <AIShoppingAssistant />
             <Toaster
               position="top-right"
               richColors
