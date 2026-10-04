@@ -73,6 +73,18 @@ export default function ProductPage({ params }) {
   const mainStageRef = useRef(null);
   const chatStreamRef = useRef(null);
 
+  // Dynamic comparison options from store catalog
+  const compareOptions = useMemo(
+    () => [
+      { name: "Puma Palermo", price: "₹6,299" },
+      { name: "Nike Court Vision", price: "₹5,999" },
+      { name: "Air Jordan 1 High", price: "₹9,500" },
+    ],
+    []
+  );
+  const [compareIndex, setCompareIndex] = useState(0);
+  const currentCompareOption = compareOptions[compareIndex];
+
   // AI Stylist chat conversation inside the right column panel
   const [aiChatMessages, setAiChatMessages] = useState([
     {
@@ -687,15 +699,52 @@ export default function ProductPage({ params }) {
       return;
     }
 
-    // 4. Compare with Nike Dunk query
-    if (lower.includes("dunk") || lower.includes("compare")) {
+    // 4. Compare with alternative products query
+    if (
+      lower.includes("compare") ||
+      lower.includes("vs") ||
+      lower.includes("palermo") ||
+      lower.includes("puma") ||
+      lower.includes("court") ||
+      lower.includes("vision") ||
+      lower.includes("high") ||
+      lower.includes("dunk")
+    ) {
+      let title = "";
+      let details = "";
+
+      if (
+        lower.includes("palermo") ||
+        lower.includes("puma") ||
+        (lower.includes("compare") && currentCompareOption.name.includes("Palermo"))
+      ) {
+        title = `⚖️ ${product?.name || "Air Jordan 1 Low"} vs Puma Palermo Leather:`;
+        details = `• Vibe & Heritage: AJ1 Low delivers 1985 basketball court DNA; Puma Palermo brings 1980s Italian terrace football culture with a gum sole.\n• Upper Materials: AJ1 Low has smooth stitched leather; Palermo combines soft suede overlays with a signature T-toe design.\n• Cushioning: AJ1 features encapsulated Nike Air-Sole in the heel; Palermo uses a low-profile street EVA cupsole.\n• Price & Savings: AJ1 Low is ₹7,600 vs Puma Palermo at ₹6,299 (Puma saves you ₹1,301).`;
+      } else if (
+        lower.includes("court") ||
+        lower.includes("vision") ||
+        (lower.includes("compare") && currentCompareOption.name.includes("Court Vision"))
+      ) {
+        title = `⚖️ ${product?.name || "Air Jordan 1 Low"} vs Nike Court Vision Low:`;
+        details = `• Aesthetic: Near-identical 1980s low-top court look with clean Swoosh placement.\n• Materials: AJ1 uses premium full-grain leather; Court Vision uses durable synthetic eco-leather.\n• Sole & Comfort: AJ1 has encapsulated Air in the heel; Court Vision uses a standard durable rubber cupsole.\n• Price & Savings: AJ1 Low (₹7,600) vs Court Vision (₹5,999) — Court Vision gives you the iconic look while saving ₹1,601!`;
+      } else if (
+        lower.includes("high") ||
+        (lower.includes("compare") && currentCompareOption.name.includes("High"))
+      ) {
+        title = `⚖️ ${product?.name || "Air Jordan 1 Low"} vs Air Jordan 1 High OG:`;
+        details = `• Collar Profile: AJ1 Low offers full ankle mobility for everyday rotation; AJ1 High has the iconic 9-hole padded collar with Wings emblem.\n• Styling: Lows are effortless with shorts, cropped trousers, and warm-weather fits; Highs look best with loose/baggy streetwear denim.\n• Price: AJ1 Low is ₹7,600 vs AJ1 High at ₹9,500.`;
+      } else {
+        title = `⚖️ ${product?.name || "Air Jordan 1 Low"} vs Nike Dunk Low:`;
+        details = `• Cushioning: AJ1 Low features encapsulated Nike Air-Sole heel cushioning; Dunk Low uses standard EVA foam.\n• Fit & Toe Box: AJ1 Low has a sleeker tapered toe profile; Dunk Low has a wider skate cupsole.\n• Heritage: AJ1 was Michael Jordan's 1985 signature sneaker; Dunk was built for 1985 college basketball.`;
+      }
+
       setTimeout(() => {
         setAiChatMessages((prev) => [
           ...prev,
           {
             id: `ai-${Date.now()}`,
             sender: "ai",
-            text: `⚖️ Air Jordan 1 Low vs Nike Dunk Low:\n\n• Cushioning: AJ1 Low features encapsulated Nike Air-Sole heel cushioning; Dunk Low uses standard EVA foam.\n• Fit & Toe Box: AJ1 Low has a sleeker, more tapered toe profile; Dunk Low has a wider skate cupsole.\n• Heritage: AJ1 was Michael Jordan's 1985 signature sneaker; Dunk was built for 1985 college basketball.`,
+            text: `${title}\n\n${details}`,
           },
         ]);
         setAiTyping(false);
@@ -1221,14 +1270,28 @@ export default function ProductPage({ params }) {
                 <span>Show cheaper options</span>
               </button>
 
-              <button
-                type="button"
-                className="ai-stylist-chip"
-                onClick={() => handleSendChatMessage("Compare with Nike Dunk")}
-              >
-                <Scale size={12} />
-                <span>Compare with Nike Dunk</span>
-              </button>
+              <div className="ai-stylist-chip-compare-row">
+                <button
+                  type="button"
+                  className="ai-stylist-chip"
+                  onClick={() => handleSendChatMessage(`Compare with ${currentCompareOption.name}`)}
+                  title={`Compare ${product?.name || "AJ1"} with ${currentCompareOption.name}`}
+                >
+                  <Scale size={12} />
+                  <span>Compare with {currentCompareOption.name}</span>
+                </button>
+                <button
+                  type="button"
+                  className="ai-stylist-chip-switch-btn"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setCompareIndex((prev) => (prev + 1) % compareOptions.length);
+                  }}
+                  title="Switch comparison product option"
+                >
+                  ⇄ Switch
+                </button>
+              </div>
             </div>
 
             {/* Interactive Input Field */}

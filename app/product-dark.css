@@ -866,6 +866,48 @@
   transform: translateX(2px);
 }
 
+.ai-stylist-chip-compare-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+
+.ai-stylist-chip-compare-row .ai-stylist-chip {
+  flex: 1;
+  min-width: 0;
+}
+
+.ai-stylist-chip-compare-row .ai-stylist-chip span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ai-stylist-chip-switch-btn {
+  background: #141724;
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  border-radius: 9999px;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #c4b5fd;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.ai-stylist-chip-switch-btn:hover {
+  background: rgba(139, 92, 246, 0.2);
+  border-color: #8b5cf6;
+  color: #ffffff;
+  transform: scale(1.04);
+}
+
 /* Chat Input Bar */
 .ai-stylist-input-row {
   display: flex;
