@@ -88,9 +88,10 @@ export default function CartPage() {
                 const price = Number(
                   String(item.price).replace(/[₹,]/g, "")
                 );
+                const itemKey = item.cartItemId || `${item.id}-${item.variantLabel || ""}`;
 
                 return (
-                  <article className="cart-item" key={item.id}>
+                  <article className="cart-item" key={itemKey}>
                     <div className="cart-item-image">
                       {item.image ? (
                         <img
@@ -106,7 +107,14 @@ export default function CartPage() {
                     </div>
 
                     <div className="cart-item-details">
-                      <p className="cart-item-category">{item.category}</p>
+                      <div className="cart-item-header-meta">
+                        <p className="cart-item-category">{item.category}</p>
+                        {item.variantLabel && (
+                          <span className="cart-item-size-pill">
+                            Size: {item.variantLabel}
+                          </span>
+                        )}
+                      </div>
 
                       <h2>{item.name}</h2>
 
@@ -119,7 +127,7 @@ export default function CartPage() {
                           <button
                             type="button"
                             onClick={() =>
-                              updateQuantity(item.id, item.quantity - 1)
+                              updateQuantity(itemKey, item.quantity - 1)
                             }
                             aria-label="Decrease quantity"
                           >
@@ -131,7 +139,7 @@ export default function CartPage() {
                           <button
                             type="button"
                             onClick={() =>
-                              updateQuantity(item.id, item.quantity + 1)
+                              updateQuantity(itemKey, item.quantity + 1)
                             }
                             aria-label="Increase quantity"
                           >
@@ -142,7 +150,7 @@ export default function CartPage() {
                         <button
                           type="button"
                           className="remove-item"
-                          onClick={() => removeFromCart(item.id)}
+                          onClick={() => removeFromCart(itemKey)}
                         >
                           Remove
                         </button>

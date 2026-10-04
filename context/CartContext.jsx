@@ -47,18 +47,24 @@ export function CartProvider({ children }) {
     }
   }, [cart, isCartLoaded]);
 
-  // Add product to cart
+  // Helper to generate a unique key for cart items based on id and variant/size
+  const getItemKey = (item) =>
+    String(
+      item.cartItemId ||
+        (item.variantLabel ? `${item.id}-${item.variantLabel}` : item.id)
+    );
+
+  // Add product to cart with size/variant awareness
   const addToCart = (product, quantity = 1) => {
     const amount = Math.max(1, Number(quantity) || 1);
+    const itemKey = getItemKey(product);
 
     setCart((currentCart) => {
-      const existing = currentCart.find(
-        (item) => String(item.id) === String(product.id)
-      );
+      const existing = currentCart.find((item) => getItemKey(item) === itemKey);
 
       if (existing) {
         return currentCart.map((item) =>
-          String(item.id) === String(product.id)
+          getItemKey(item) === itemKey
             ? {
                 ...item,
                 quantity: Number(item.quantity || 0) + amount,
@@ -71,6 +77,7 @@ export function CartProvider({ children }) {
         ...currentCart,
         {
           ...product,
+          cartItemId: itemKey,
           quantity: amount,
         },
       ];
@@ -78,33 +85,35 @@ export function CartProvider({ children }) {
 
     // Notify user with sonner toast
     const itemName = product?.name || "Item";
+    const variantTag = product?.variantLabel ? ` (${product.variantLabel})` : "";
     toast.success("Added to bag! 🛍️", {
-      description: `${itemName} (×${amount}) has been added to your shopping bag.`,
+      description: `${itemName}${variantTag} (×${amount}) has been added to your shopping bag.`,
       duration: 3500,
     });
   };
 
-  // Remove product
-  const removeFromCart = (id) => {
+  // Remove product by id or cart item key
+  const removeFromCart = (idOrKey) => {
     setCart((currentCart) =>
       currentCart.filter(
-        (item) => String(item.id) !== String(id)
+        (item) =>
+          getItemKey(item) !== String(idOrKey) && String(item.id) !== String(idOrKey)
       )
     );
   };
 
-  // Update quantity
-  const updateQuantity = (id, quantity) => {
+  // Update quantity by id or cart item key
+  const updateQuantity = (idOrKey, quantity) => {
     const amount = Number(quantity);
 
     if (amount < 1) {
-      removeFromCart(id);
+      removeFromCart(idOrKey);
       return;
     }
 
     setCart((currentCart) =>
       currentCart.map((item) =>
-        String(item.id) === String(id)
+        getItemKey(item) === String(idOrKey) || String(item.id) === String(idOrKey)
           ? { ...item, quantity: amount }
           : item
       )

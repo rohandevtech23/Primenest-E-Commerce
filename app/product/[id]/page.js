@@ -5,7 +5,19 @@ import { use, useEffect, useState } from "react";
 import { useCart } from "@/context/CartContext";
 import Navbar from "@/components/Navbar";
 import Link from "next/link";
-import { ShoppingBag, Heart, Sparkles, ArrowUpRight, Check, Eye } from "lucide-react";
+import {
+  ShoppingBag,
+  Heart,
+  Sparkles,
+  ArrowUpRight,
+  Check,
+  Eye,
+  Ruler,
+  Droplets,
+  X,
+  Info,
+} from "lucide-react";
+import { toast } from "sonner";
 import VirtualTryOnModal from "@/components/VirtualTryOnModal";
 import AIReviewSummarizer from "@/components/AIReviewSummarizer";
 
@@ -23,6 +35,7 @@ export default function ProductPage({ params }) {
   const [error, setError] = useState("");
   const [addedRecently, setAddedRecently] = useState(false);
   const [isTryOnOpen, setIsTryOnOpen] = useState(false);
+  const [showSizeGuide, setShowSizeGuide] = useState(false);
 
   // Fetch product and related products from PostgreSQL through the API
   useEffect(() => {
@@ -64,33 +77,84 @@ export default function ProductPage({ params }) {
       maximumFractionDigits: 2,
     });
 
-  // Variants are optional and configured per product.
-  const variants = Array.isArray(product?.variants)
-    ? product.variants
-        .map((variant) =>
-          typeof variant === "string"
-            ? { label: variant, stock: null }
-            : {
-                ...variant,
-                label:
-                  variant.label ??
-                  variant.name ??
-                  variant.value ??
-                  "",
-                stock:
-                  variant.stock == null
-                    ? null
-                    : Number(variant.stock),
-              }
-        )
-        .filter((variant) => variant.label)
+  // Category detection for intelligent size variants
+  const isFootwear =
+    product?.category === "Footwear" ||
+    (product?.subcategory && product.subcategory.toLowerCase().includes("shoes")) ||
+    (product?.subcategory && product.subcategory.toLowerCase().includes("sneaker")) ||
+    (product?.subcategory && product.subcategory.toLowerCase().includes("slippers"));
+
+  const isPerfume =
+    product?.category === "Perfume" ||
+    (product?.subcategory && product.subcategory.toLowerCase().includes("perfume"));
+
+  // Default fallback variants if a product row doesn't have variants configured
+  const defaultCategoryVariants = isFootwear
+    ? [
+        { label: "UK 6", stock: 12 },
+        { label: "UK 7", stock: 15 },
+        { label: "UK 8", stock: 18 },
+        { label: "UK 9", stock: 16 },
+        { label: "UK 10", stock: 10 },
+        { label: "UK 11", stock: 8 },
+      ]
+    : isPerfume
+    ? [
+        { label: "100ml", stock: 25 },
+        { label: "150ml", stock: 18 },
+      ]
     : [];
 
+  const rawVariants =
+    Array.isArray(product?.variants) && product.variants.length > 0
+      ? product.variants
+      : defaultCategoryVariants;
+
+  // Variants are optional and configured per product.
+  const variants = rawVariants
+    .map((variant) =>
+      typeof variant === "string"
+        ? { label: variant, stock: null }
+        : {
+            ...variant,
+            label:
+              variant.label ??
+              variant.name ??
+              variant.value ??
+              "",
+            stock:
+              variant.stock == null
+                ? null
+                : Number(variant.stock),
+          }
+    )
+    .filter((variant) => variant.label);
+
   const hasVariants = variants.length > 0;
+
+  // Auto-select the first in-stock variant when loaded
+  useEffect(() => {
+    if (hasVariants && !selectedVariant) {
+      const firstInStock = variants.find(
+        (v) => v.stock === null || v.stock > 0
+      );
+      if (firstInStock) {
+        setSelectedVariant(firstInStock.label);
+      }
+    }
+  }, [hasVariants, variants, selectedVariant]);
 
   const activeVariant = variants.find(
     (variant) => variant.label === selectedVariant
   );
+
+  const variantSectionLabel =
+    product?.variant_label ||
+    (isFootwear
+      ? "SELECT SHOE SIZE (UK/IN)"
+      : isPerfume
+      ? "SELECT BOTTLE SIZE"
+      : "SELECT OPTION");
 
   // Use variant stock when supplied; otherwise use product stock.
   const availableStock =
@@ -102,7 +166,16 @@ export default function ProductPage({ params }) {
   const isOutOfStock = availableStock < 1;
 
   const handleAddToCart = () => {
-    if (hasVariants && !activeVariant) return;
+    if (hasVariants && !activeVariant) {
+      toast.error(
+        isFootwear
+          ? "Please select a shoe size (e.g. UK 8) before adding to bag."
+          : isPerfume
+          ? "Please select a bottle size (100ml / 150ml) before adding to bag."
+          : "Please choose an option before adding to bag."
+      );
+      return;
+    }
     if (quantity < 1 || quantity > availableStock) return;
 
     const cartProduct = hasVariants
@@ -304,21 +377,50 @@ export default function ProductPage({ params }) {
             {hasVariants && (
               <div className="product-variant-section">
                 <div className="product-variant-heading">
-                  <span>
-                    {product.variant_label || "SELECT OPTION"}
-                  </span>
+                  <div className="variant-title-wrap">
+                    {isFootwear && <Ruler size={14} className="variant-icon-gold" />}
+                    {isPerfume && <Droplets size={14} className="variant-icon-gold" />}
+                    <span>{variantSectionLabel}</span>
+                  </div>
 
-                  <span className="selected-variant-label">
-                    {selectedVariant
-                      ? `Selected: ${selectedVariant}`
-                      : "Choose an option"}
-                  </span>
+                  <div className="variant-header-right">
+                    {isFootwear && (
+                      <button
+                        type="button"
+                        className="size-guide-trigger"
+                        onClick={() => setShowSizeGuide(true)}
+                        aria-label="Open shoe size guide"
+                      >
+                        <Ruler size={12} />
+                        <span>Size Guide</span>
+                      </button>
+                    )}
+
+                    <span className="selected-variant-label">
+                      {selectedVariant ? (
+                        <>
+                          Selected: <strong>{selectedVariant}</strong>
+                          {activeVariant?.stock != null && (
+                            <span className="variant-stock-hint">
+                              {" "}
+                              ({activeVariant.stock} available)
+                            </span>
+                          )}
+                        </>
+                      ) : (
+                        "Choose an option"
+                      )}
+                    </span>
+                  </div>
                 </div>
 
-                <div className="product-variant-options">
+                <div
+                  className={`product-variant-options ${
+                    isFootwear ? "is-shoe-sizes" : isPerfume ? "is-perfume-sizes" : ""
+                  }`}
+                >
                   {variants.map((variant, index) => {
-                    const isSelected =
-                      selectedVariant === variant.label;
+                    const isSelected = selectedVariant === variant.label;
 
                     const variantOutOfStock =
                       variant.stock != null &&
@@ -333,7 +435,7 @@ export default function ProductPage({ params }) {
                           isSelected ? "active" : ""
                         } ${
                           variantOutOfStock ? "unavailable" : ""
-                        }`}
+                        } ${isPerfume ? "perfume-pill" : ""}`}
                         onClick={() => {
                           if (variantOutOfStock) return;
                           setSelectedVariant(variant.label);
@@ -341,12 +443,30 @@ export default function ProductPage({ params }) {
                         }}
                         disabled={variantOutOfStock}
                         aria-pressed={isSelected}
+                        title={
+                          variantOutOfStock
+                            ? "Out of stock"
+                            : `${variant.label} (${variant.stock ?? availableStock} available)`
+                        }
                       >
-                        {variant.label}
+                        {isPerfume && <Droplets size={12} className="btn-drop-icon" />}
+                        <span>{variant.label}</span>
+                        {isSelected && <Check size={11} className="active-check-icon" />}
                       </button>
                     );
                   })}
                 </div>
+
+                {isPerfume && (
+                  <p className="perfume-size-tip">
+                    ✦ <strong>100ml</strong> offers ~1,000 sprays (4–6 months). <strong>150ml</strong> offers ~1,500 sprays with best value.
+                  </p>
+                )}
+                {isFootwear && (
+                  <p className="shoe-size-tip">
+                    ✦ Standard UK sizing. Fits true to size. If you are between sizes, we recommend ordering half size up.
+                  </p>
+                )}
               </div>
             )}
 
@@ -547,6 +667,101 @@ export default function ProductPage({ params }) {
           product={product}
           onAddToCart={handleAddToCart}
         />
+
+        {/* FOOTWEAR SIZE GUIDE MODAL */}
+        {showSizeGuide && (
+          <div
+            className="size-guide-modal-backdrop"
+            onClick={() => setShowSizeGuide(false)}
+          >
+            <div
+              className="size-guide-modal-card"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="size-guide-modal-header">
+                <div>
+                  <h3 className="size-guide-title">Footwear Sizing Chart</h3>
+                  <p className="size-guide-subtitle">
+                    Universal conversion guide for Indian (UK), US & European sizing
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="size-guide-close-btn"
+                  onClick={() => setShowSizeGuide(false)}
+                  aria-label="Close Size Guide"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div className="size-guide-table-wrap">
+                <table className="size-guide-table">
+                  <thead>
+                    <tr>
+                      <th>UK / IN</th>
+                      <th>US Men</th>
+                      <th>US Women</th>
+                      <th>EU</th>
+                      <th>Foot Length (CM)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><strong>UK 6</strong></td>
+                      <td>US 7</td>
+                      <td>US 8.5</td>
+                      <td>40</td>
+                      <td>25.0 cm</td>
+                    </tr>
+                    <tr>
+                      <td><strong>UK 7</strong></td>
+                      <td>US 8</td>
+                      <td>US 9.5</td>
+                      <td>41</td>
+                      <td>26.0 cm</td>
+                    </tr>
+                    <tr>
+                      <td><strong>UK 8</strong></td>
+                      <td>US 9</td>
+                      <td>US 10.5</td>
+                      <td>42.5</td>
+                      <td>27.0 cm</td>
+                    </tr>
+                    <tr>
+                      <td><strong>UK 9</strong></td>
+                      <td>US 10</td>
+                      <td>US 11.5</td>
+                      <td>44</td>
+                      <td>28.0 cm</td>
+                    </tr>
+                    <tr>
+                      <td><strong>UK 10</strong></td>
+                      <td>US 11</td>
+                      <td>US 12.5</td>
+                      <td>45</td>
+                      <td>29.0 cm</td>
+                    </tr>
+                    <tr>
+                      <td><strong>UK 11</strong></td>
+                      <td>US 12</td>
+                      <td>US 13.5</td>
+                      <td>46</td>
+                      <td>30.0 cm</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="size-guide-footer">
+                <Info size={14} className="text-amber-600" />
+                <span>
+                  Unsure of your exact fit? Ask our <strong>AI Stylist</strong> Concierge at the bottom-right corner for personalized fit advice.
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </>
   );

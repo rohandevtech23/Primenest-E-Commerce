@@ -9715,9 +9715,9 @@ body * {
 }
 
 
-/* Optional product variants */
+/* Optional product variants (Shoe sizes & Perfume sizes) */
 .product-variant-section {
-  margin: 28px 0 24px;
+  margin: 24px 0 20px;
 }
 
 .product-variant-heading {
@@ -9726,60 +9726,296 @@ body * {
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 10px;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
   font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 1.5px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+}
+
+.variant-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #171717;
+}
+
+.variant-icon-gold {
+  color: #b45309;
+}
+
+.variant-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.size-guide-trigger {
+  background: transparent;
+  border: none;
+  color: #b45309;
+  font-size: 11.5px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  padding: 0;
+  transition: color 0.15s ease;
+}
+
+.size-guide-trigger:hover {
+  color: #92400e;
 }
 
 .selected-variant-label {
-  color: #888;
-  font-size: 11px;
-  font-weight: 400;
-  letter-spacing: 0.3px;
+  color: #64748b;
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
   text-transform: none;
+}
+
+.selected-variant-label strong {
+  color: #0f172a;
+}
+
+.variant-stock-hint {
+  color: #059669;
+  font-weight: 600;
 }
 
 .product-variant-options {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
 }
 
 .product-variant-button {
-  min-width: 49px;
-  min-height: 45px;
-  padding: 0 12px;
-  border: 1px solid #dedede;
-  background: transparent;
-  color: #171717;
-  font-size: 12px;
-  font-weight: 500;
+  min-width: 52px;
+  height: 44px;
+  padding: 0 14px;
+  border: 1.5px solid #e2e8f0;
+  background: #ffffff;
+  color: #1e293b;
+  font-size: 12.5px;
+  font-weight: 700;
+  border-radius: 8px;
   cursor: pointer;
-  transition: background 0.2s ease,
-    color 0.2s ease,
-    border-color 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  position: relative;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
 }
 
 .product-variant-button:hover:not(:disabled) {
-  border-color: #111;
+  border-color: #0f172a;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.06);
 }
 
 .product-variant-button.active {
-  background: #111;
-  color: #fff;
-  border-color: #111;
+  background: linear-gradient(135deg, #09090b 0%, #1e293b 100%);
+  color: #ffffff;
+  border-color: #09090b;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.25);
 }
 
 .product-variant-button.unavailable {
   opacity: 0.35;
   text-decoration: line-through;
   cursor: not-allowed;
+  background: #f8fafc;
 }
 
 .product-variant-button:focus-visible {
-  outline: 2px solid #b58b42;
-  outline-offset: 3px;
+  outline: 2px solid #d4af37;
+  outline-offset: 2px;
+}
+
+/* Perfume Specific Volume Pills */
+.product-variant-options.is-perfume-sizes {
+  gap: 12px;
+}
+
+.product-variant-button.perfume-pill {
+  min-width: 95px;
+  height: 44px;
+  border-radius: 9999px;
+  font-size: 13px;
+  padding: 0 18px;
+}
+
+.product-variant-button.perfume-pill.active {
+  border-color: #d4af37;
+  box-shadow: 0 4px 14px rgba(212, 175, 55, 0.3);
+}
+
+.btn-drop-icon {
+  color: #b45309;
+}
+
+.product-variant-button.active .btn-drop-icon {
+  color: #fde68a;
+}
+
+.active-check-icon {
+  color: #34d399;
+}
+
+.perfume-size-tip,
+.shoe-size-tip {
+  margin-top: 10px;
+  font-size: 11.5px;
+  color: #78716c;
+  line-height: 1.5;
+  font-style: italic;
+}
+
+/* Cart Item Size Pill */
+.cart-item-header-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 2px;
+}
+
+.cart-item-size-pill {
+  display: inline-block;
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 1px 7px;
+  border-radius: 9999px;
+}
+
+/* Footwear Size Guide Modal */
+.size-guide-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(8px);
+  z-index: 10000;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.size-guide-modal-card {
+  background: #ffffff;
+  border-radius: 20px;
+  max-width: 580px;
+  width: 100%;
+  box-shadow: 0 25px 60px -12px rgba(0, 0, 0, 0.35);
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  animation: vtonPop 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.size-guide-modal-header {
+  padding: 18px 24px;
+  background: linear-gradient(135deg, #09090b 0%, #18181b 100%);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.3);
+}
+
+.size-guide-title {
+  font-family: var(--font-playfair), Georgia, serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.size-guide-subtitle {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 2px;
+}
+
+.size-guide-close-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: all 0.2s ease;
+}
+
+.size-guide-close-btn:hover {
+  background: rgba(212, 175, 55, 0.25);
+  border-color: #d4af37;
+  transform: scale(1.05);
+}
+
+.size-guide-table-wrap {
+  padding: 16px 20px;
+  overflow-x: auto;
+}
+
+.size-guide-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  text-align: left;
+}
+
+.size-guide-table th {
+  background: #f8fafc;
+  color: #0f172a;
+  font-weight: 700;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 10px 12px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.size-guide-table td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #475569;
+}
+
+.size-guide-table tbody tr:hover {
+  background: #fcfbf9;
+}
+
+.size-guide-table tbody tr td:first-child {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.size-guide-footer {
+  padding: 14px 20px;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11.5px;
+  color: #64748b;
+  line-height: 1.45;
+}
+
+.size-guide-footer strong {
+  color: #0f172a;
 }
 
 .add-to-bag:disabled {
