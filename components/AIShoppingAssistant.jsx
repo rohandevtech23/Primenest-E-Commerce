@@ -1,16 +1,61 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Sparkles, MessageSquare, X, Send, ShoppingBag, ArrowRight, RefreshCw, Bot, User } from "lucide-react";
+import {
+  Sparkles,
+  MessageSquare,
+  X,
+  Send,
+  ShoppingBag,
+  ArrowRight,
+  RotateCcw,
+  Check,
+  Compass,
+  ExternalLink,
+} from "lucide-react";
 import Link from "next/link";
 import { useCart } from "@/context/CartContext";
 
 const STARTER_PROMPTS = [
   "Curate an outfit for an evening dinner date",
-  "Show me authentic footwear under ₹3,000",
-  "What matches well with the Oxford Shirt?",
-  "Breathable summer linen collection",
+  "Show me red casual shoes or sneakers",
+  "Dark green sneakers in catalog",
+  "Luxury perfumes with woody notes",
+  "Footwear under ₹5,000",
 ];
+
+// Helper to format assistant markdown nicely (bolding, lists, linebreaks)
+function formatAssistantMessage(text) {
+  if (!text) return null;
+  const lines = text.split("\n");
+  return lines.map((line, lineIdx) => {
+    if (!line.trim()) {
+      return <div key={lineIdx} className="ai-text-spacer" />;
+    }
+
+    // Parse **bold text**
+    const parts = line.split(/(\*\*.*?\*\*)/g);
+    const renderedLine = parts.map((part, pIdx) => {
+      if (part.startsWith("**") && part.endsWith("**")) {
+        return (
+          <strong key={pIdx} className="ai-text-bold">
+            {part.slice(2, -2)}
+          </strong>
+        );
+      }
+      return part;
+    });
+
+    // Check if line is a numbered item or bullet
+    const isListItem = /^\s*(\d+\.|\-|\*)\s+/.test(line);
+
+    return (
+      <p key={lineIdx} className={`ai-text-line ${isListItem ? "ai-list-line" : ""}`}>
+        {renderedLine}
+      </p>
+    );
+  });
+}
 
 export default function AIShoppingAssistant() {
   const [isOpen, setIsOpen] = useState(false);
@@ -19,22 +64,21 @@ export default function AIShoppingAssistant() {
   const { addToCart } = useCart();
   const [addedMap, setAddedMap] = useState({});
 
-  const [messages, setMessages] = useState([
-    {
-      id: "welcome",
-      role: "assistant",
-      text: "Hello! I am your PrimeNest Personal Stylist & Shopping Concierge. Whether you're assembling a bespoke look, searching for seasonal fabrics, or finding the ideal gift, I am here to assist you.",
-      products: [],
-    },
-  ]);
+  const initialWelcome = {
+    id: "welcome",
+    role: "assistant",
+    text: "Welcome to PrimeNest Haute Concierge. I am your personal AI Stylist—ask me for outfit curations, specific colors, occasions, footwear, or luxury fragrances from our catalog.",
+    products: [],
+  };
 
+  const [messages, setMessages] = useState([initialWelcome]);
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
     if (isOpen) {
       messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }
-  }, [messages, isOpen]);
+  }, [messages, isOpen, loading]);
 
   const handleSend = async (textToSend) => {
     const query = typeof textToSend === "string" ? textToSend : input;
@@ -56,7 +100,7 @@ export default function AIShoppingAssistant() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           message: query.trim(),
-          history: messages.slice(-4).map((m) => ({ role: m.role, content: m.text })),
+          history: messages.slice(-5).map((m) => ({ role: m.role, content: m.text })),
         }),
       });
 
@@ -69,7 +113,7 @@ export default function AIShoppingAssistant() {
       const assistantMsg = {
         id: String(Date.now() + 1),
         role: "assistant",
-        text: data.reply || "Here are pieces from our collection tailored to your request:",
+        text: data.reply || "Here are select pieces from our catalog curated for your request:",
         products: data.products || [],
       };
 
@@ -81,7 +125,7 @@ export default function AIShoppingAssistant() {
         {
           id: String(Date.now() + 1),
           role: "assistant",
-          text: "I am having trouble accessing the catalog at this precise moment. Please explore our shop collection or ask again in a moment.",
+          text: "I encountered a brief moment connecting to our catalog. Please try asking again in a moment, or explore our curated shop collection.",
           products: [],
         },
       ]);
@@ -96,7 +140,16 @@ export default function AIShoppingAssistant() {
     setAddedMap((prev) => ({ ...prev, [product.id]: true }));
     setTimeout(() => {
       setAddedMap((prev) => ({ ...prev, [product.id]: false }));
-    }, 2000);
+    }, 2200);
+  };
+
+  const handleResetSession = () => {
+    setMessages([
+      {
+        ...initialWelcome,
+        id: String(Date.now()),
+      },
+    ]);
   };
 
   return (
@@ -109,10 +162,16 @@ export default function AIShoppingAssistant() {
           onClick={() => setIsOpen(true)}
           aria-label="Open AI Personal Stylist"
         >
+          <div className="fab-aura-ring" />
           <div className="fab-pulse" />
           <div className="fab-content">
-            <Sparkles size={18} className="fab-sparkle" />
-            <span className="fab-label">AI Stylist</span>
+            <div className="fab-icon-wrap">
+              <Sparkles size={18} className="fab-sparkle" />
+            </div>
+            <div className="fab-text-stack">
+              <span className="fab-tagline">AI Concierge</span>
+              <span className="fab-label">PrimeNest Stylist</span>
+            </div>
           </div>
         </button>
       )}
@@ -124,38 +183,61 @@ export default function AIShoppingAssistant() {
           <div className="ai-chat-header">
             <div className="ai-chat-header-info">
               <div className="ai-chat-avatar">
-                <Sparkles size={16} />
+                <Sparkles size={17} className="header-sparkle-icon" />
+                <span className="avatar-status-pip" />
               </div>
               <div>
-                <h4>PrimeNest Stylist</h4>
+                <div className="ai-header-title-row">
+                  <h4 className="ai-brand-heading">PrimeNest Stylist</h4>
+                  <span className="ai-badge-gemini">Haute AI</span>
+                </div>
                 <span className="ai-online-status">
-                  <span className="online-dot" /> AI Shopping Concierge
+                  <span className="online-dot" /> Live Shopping Concierge
                 </span>
               </div>
             </div>
 
-            <button
-              type="button"
-              className="ai-chat-close-btn"
-              onClick={() => setIsOpen(false)}
-              aria-label="Close Chat"
-            >
-              <X size={18} />
-            </button>
+            <div className="ai-header-actions">
+              <button
+                type="button"
+                className="ai-header-btn"
+                onClick={handleResetSession}
+                title="Restart Style Consultation"
+                aria-label="Reset conversation"
+              >
+                <RotateCcw size={15} />
+              </button>
+              <button
+                type="button"
+                className="ai-chat-close-btn"
+                onClick={() => setIsOpen(false)}
+                title="Close Concierge"
+                aria-label="Close Chat"
+              >
+                <X size={17} />
+              </button>
+            </div>
           </div>
 
           {/* Quick Prompts Bar */}
-          <div className="ai-quick-prompts">
-            {STARTER_PROMPTS.map((prompt, idx) => (
-              <button
-                key={idx}
-                type="button"
-                className="ai-prompt-chip"
-                onClick={() => handleSend(prompt)}
-              >
-                {prompt}
-              </button>
-            ))}
+          <div className="ai-quick-prompts-wrapper">
+            <div className="ai-prompts-hint">
+              <Compass size={12} className="ai-prompts-icon" />
+              <span>Inspirations:</span>
+            </div>
+            <div className="ai-quick-prompts">
+              {STARTER_PROMPTS.map((prompt, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  className="ai-prompt-chip"
+                  onClick={() => handleSend(prompt)}
+                >
+                  <Sparkles size={11} className="chip-sparkle" />
+                  <span>{prompt}</span>
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* Messages Stream */}
@@ -172,11 +254,20 @@ export default function AIShoppingAssistant() {
                 )}
 
                 <div className="ai-message-bubble">
-                  <p>{msg.text}</p>
+                  {msg.role === "assistant" ? (
+                    <div className="ai-formatted-content">
+                      {formatAssistantMessage(msg.text)}
+                    </div>
+                  ) : (
+                    <p className="ai-user-text">{msg.text}</p>
+                  )}
 
                   {/* Render Product Cards inside Assistant Message */}
                   {msg.products && msg.products.length > 0 && (
                     <div className="ai-card-carousel">
+                      <div className="ai-carousel-heading">
+                        <span>Curated Suggestions ({msg.products.length})</span>
+                      </div>
                       {msg.products.map((p) => {
                         const img =
                           p.image ||
@@ -190,19 +281,34 @@ export default function AIShoppingAssistant() {
                               href={`/product/${p.id}`}
                               className="ai-card-thumb-link"
                             >
-                              <img src={img} alt={p.name} />
+                              <img src={img} alt={p.name} loading="lazy" />
+                              <div className="ai-card-thumb-overlay">
+                                <ExternalLink size={12} />
+                              </div>
                             </Link>
 
                             <div className="ai-card-details">
-                              <span className="ai-card-cat">{p.category}</span>
+                              <div className="ai-card-top-meta">
+                                <span className="ai-card-cat">{p.category}</span>
+                                {p.subcategory && (
+                                  <span className="ai-card-subcat">
+                                    • {p.subcategory}
+                                  </span>
+                                )}
+                              </div>
+
                               <Link
                                 href={`/product/${p.id}`}
                                 className="ai-card-name"
+                                title={p.name}
                               >
                                 {p.name}
                               </Link>
-                              <div className="ai-card-price">
-                                ₹{Number(p.price).toLocaleString("en-IN")}
+
+                              <div className="ai-card-price-row">
+                                <span className="ai-card-price">
+                                  ₹{Number(p.price).toLocaleString("en-IN")}
+                                </span>
                               </div>
 
                               <div className="ai-card-actions">
@@ -210,15 +316,25 @@ export default function AIShoppingAssistant() {
                                   href={`/product/${p.id}`}
                                   className="ai-btn-view"
                                 >
-                                  View
+                                  <span>View</span>
+                                  <ArrowRight size={11} />
                                 </Link>
 
                                 <button
                                   type="button"
                                   className={`ai-btn-add ${isAdded ? "added" : ""}`}
                                   onClick={() => handleQuickAdd(p)}
+                                  disabled={isAdded}
                                 >
-                                  {isAdded ? "Added!" : "+ Bag"}
+                                  {isAdded ? (
+                                    <>
+                                      <Check size={12} /> Added
+                                    </>
+                                  ) : (
+                                    <>
+                                      <ShoppingBag size={12} /> + Bag
+                                    </>
+                                  )}
                                 </button>
                               </div>
                             </div>
@@ -232,8 +348,8 @@ export default function AIShoppingAssistant() {
             ))}
 
             {loading && (
-              <div className="ai-message-row assistant-row">
-                <div className="ai-msg-avatar">
+              <div className="ai-message-row assistant-row loading-row">
+                <div className="ai-msg-avatar pulse-avatar">
                   <Sparkles size={13} />
                 </div>
                 <div className="ai-message-bubble loading-bubble">
@@ -242,7 +358,9 @@ export default function AIShoppingAssistant() {
                     <span />
                     <span />
                   </div>
-                  <small>Consulting catalog & style trends...</small>
+                  <div className="ai-typing-caption">
+                    <span className="caption-gold">PrimeNest Stylist</span> is evaluating luxury fabrics & stock...
+                  </div>
                 </div>
               </div>
             )}
@@ -258,20 +376,27 @@ export default function AIShoppingAssistant() {
               handleSend();
             }}
           >
-            <input
-              type="text"
-              placeholder="Ask for an outfit, occasion, or style tip..."
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              disabled={loading}
-            />
-            <button
-              type="submit"
-              disabled={!input.trim() || loading}
-              aria-label="Send message"
-            >
-              <Send size={15} />
-            </button>
+            <div className="ai-input-pill-wrap">
+              <input
+                type="text"
+                placeholder="Ask for an outfit, color, occasion, or style tip..."
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                disabled={loading}
+                autoFocus={false}
+              />
+              <button
+                type="submit"
+                className="ai-send-btn"
+                disabled={!input.trim() || loading}
+                aria-label="Send message"
+              >
+                <Send size={15} />
+              </button>
+            </div>
+            <div className="ai-input-footer-note">
+              <span>Powered by Gemini Intelligence • Real-time Catalog Sync</span>
+            </div>
           </form>
         </div>
       )}
