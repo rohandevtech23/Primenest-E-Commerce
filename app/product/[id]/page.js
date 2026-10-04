@@ -325,44 +325,186 @@ export default function ProductPage({ params }) {
     router.push("/checkout");
   };
 
-  // Add Complete Outfit
-  const handleBuyCompleteOutfit = () => {
-    const cartProduct = {
-      ...product,
-      selectedVariant: activeVariant || { label: selectedVariant },
-      variantLabel: selectedVariant,
-      color: selectedColor,
-    };
+  // =========================================================================
+  // COMPLETE THE LOOK (OUTFIT DIALOG MODAL STATE & HANDLERS)
+  // =========================================================================
+  const [isOutfitModalOpen, setIsOutfitModalOpen] = useState(false);
+  const [outfitSizes, setOutfitSizes] = useState({
+    shoe: selectedVariant || "UK 9",
+    jeans: "32",
+    tee: "L",
+  });
+  const [outfitSelectedItems, setOutfitSelectedItems] = useState({
+    shoe: true,
+    jeans: true,
+    tee: true,
+  });
 
-    addToCart(cartProduct, quantity, { silent: true });
-    addToCart(
+  // Keep shoe size in sync with page selectedVariant
+  useEffect(() => {
+    if (selectedVariant) {
+      setOutfitSizes((prev) => ({ ...prev, shoe: selectedVariant }));
+    }
+  }, [selectedVariant]);
+
+  // Handle ESC key and scroll lock for outfit modal
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setIsOutfitModalOpen(false);
+      }
+    };
+    if (isOutfitModalOpen) {
+      document.addEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "hidden";
+    }
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "unset";
+    };
+  }, [isOutfitModalOpen]);
+
+  // Complete outfit pieces definition
+  const outfitPieces = useMemo(() => {
+    const shoeSizes =
+      Array.isArray(product?.variants) && product.variants.length > 0
+        ? product.variants.map((v) =>
+            typeof v === "object" ? v.label || v.size || v.name : String(v)
+          )
+        : ["UK 6", "UK 7", "UK 8", "UK 9", "UK 10", "UK 11"];
+
+    return [
       {
+        key: "shoe",
+        id: product?.id || 101,
+        name: product?.name || "Air Jordan 1 Low Retro",
+        category: "Footwear",
+        tag: "Core Sneaker",
+        price: Number(product?.price) || 7600,
+        image:
+          currentImage ||
+          product?.images?.[0] ||
+          "https://images.unsplash.com/photo-1552346154-21d32810aba3?w=800&q=80",
+        sizes: shoeSizes,
+        sizeType: "Shoe Size (UK)",
+        desc: "Heritage low-top silhouette with responsive Nike Air heel cushioning",
+      },
+      {
+        key: "jeans",
         id: 991,
         name: "Vintage Washed Indigo Denim Jeans",
+        category: "Denim & Bottoms",
+        tag: "Relaxed Straight",
         price: 2499,
-        image: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=400&q=80",
-        category: "Men",
-        subcategory: "Jeans",
+        image:
+          "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=400&q=80",
+        sizes: ["28", "30", "32", "34", "36", "38"],
+        sizeType: "Waist Size",
+        desc: "13.5oz ring-spun raw denim with authentic distressed vintage wash",
       },
-      1,
-      { silent: true }
-    );
-    addToCart(
       {
+        key: "tee",
         id: 992,
         name: "Heavyweight Boxy Tee & Snapback Cap Set",
+        category: "Streetwear Apparel",
+        tag: "Oversized Fit",
         price: 1899,
-        image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=400&q=80",
-        category: "Men",
-        subcategory: "T-Shirts",
+        image:
+          "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=400&q=80",
+        sizes: ["S", "M", "L", "XL", "XXL"],
+        sizeType: "Apparel Size",
+        desc: "240 GSM drop-shoulder boxy cotton tee paired with structured 6-panel cap",
       },
-      1,
-      { silent: true }
-    );
+    ];
+  }, [product, currentImage]);
 
-    toast.success("Complete 3-Piece Outfit added to Bag! 🛍️", {
-      description: "Air Jordan 1 Low + Indigo Jeans + Boxy Tee Set (Total: ₹11,998)",
+  // Pricing calculations with 10% Bundle Discount
+  const outfitPricing = useMemo(() => {
+    const selectedList = outfitPieces.filter((p) => outfitSelectedItems[p.key]);
+    const originalTotal = selectedList.reduce((sum, item) => sum + item.price, 0);
+    const isFullBundle =
+      outfitSelectedItems.shoe && outfitSelectedItems.jeans && outfitSelectedItems.tee;
+    const discountAmount = isFullBundle ? Math.round(originalTotal * 0.1) : 0;
+    const finalTotal = Math.max(0, originalTotal - discountAmount);
+
+    return {
+      selectedCount: selectedList.length,
+      originalTotal,
+      discountAmount,
+      finalTotal,
+      isFullBundle,
+    };
+  }, [outfitPieces, outfitSelectedItems]);
+
+  // Add Outfit pieces to Cart with selected sizes
+  const handleConfirmOutfitCart = ({ checkout = false } = {}) => {
+    const selectedPieces = outfitPieces.filter((p) => outfitSelectedItems[p.key]);
+    if (selectedPieces.length === 0) {
+      toast.error("Please select at least one item from the outfit.");
+      return;
+    }
+
+    selectedPieces.forEach((piece) => {
+      const chosenSize = outfitSizes[piece.key];
+      if (piece.key === "shoe") {
+        addToCart(
+          {
+            ...product,
+            selectedVariant: { label: chosenSize },
+            variantLabel: chosenSize,
+            color: selectedColor,
+          },
+          1,
+          { silent: true }
+        );
+      } else {
+        addToCart(
+          {
+            id: piece.id,
+            name: piece.name,
+            price: piece.price,
+            image: piece.image,
+            category: piece.category,
+            variantLabel: `${piece.sizeType}: ${chosenSize}`,
+            selectedVariant: { label: chosenSize },
+          },
+          1,
+          { silent: true }
+        );
+      }
     });
+
+    setIsOutfitModalOpen(false);
+
+    if (checkout) {
+      toast.success("Outfit configured! Proceeding to checkout ⚡", {
+        description: `${selectedPieces.length} item${
+          selectedPieces.length > 1 ? "s" : ""
+        } added with custom sizes.`,
+      });
+      router.push("/checkout");
+    } else {
+      toast.success(
+        selectedPieces.length === 3
+          ? "Complete 3-Piece Outfit added to Bag! 🛍️"
+          : `${selectedPieces.length} Outfit item${
+              selectedPieces.length > 1 ? "s" : ""
+            } added to Bag! 🛍️`,
+        {
+          description: `Total: ₹${outfitPricing.finalTotal.toLocaleString(
+            "en-IN"
+          )}${
+            outfitPricing.discountAmount > 0
+              ? ` (Saved ₹${outfitPricing.discountAmount.toLocaleString("en-IN")})`
+              : ""
+          }`,
+        }
+      );
+    }
+  };
+
+  const handleOpenOutfitModal = () => {
+    setIsOutfitModalOpen(true);
   };
 
   // Share functionality
@@ -1360,8 +1502,20 @@ export default function ProductPage({ params }) {
           <div id="complete-the-look-section" className="dark-feature-card dark-outfit-card">
             <div className="outfit-card-header">
               <h4 className="suite-card-title">Complete the Look</h4>
+              <span className="outfit-card-badge">✨ 3-Piece Bundle</span>
             </div>
-            <div className="outfit-items-row">
+            <div
+              className="outfit-items-row"
+              onClick={() => setIsOutfitModalOpen(true)}
+              title="Click to preview outfit & pick sizes"
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  setIsOutfitModalOpen(true);
+                }
+              }}
+            >
               <div className="outfit-item-thumb">
                 <img src={currentImage} alt="Sneaker" />
               </div>
@@ -1383,7 +1537,7 @@ export default function ProductPage({ params }) {
             <button
               type="button"
               className="suite-btn-complete-outfit"
-              onClick={handleBuyCompleteOutfit}
+              onClick={() => setIsOutfitModalOpen(true)}
             >
               <span>Buy Complete Outfit</span>
               <ArrowUpRight size={14} />
@@ -1653,6 +1807,194 @@ export default function ProductPage({ params }) {
                 </tr>
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* =========================================================================
+          COMPLETE THE LOOK OUTFIT CUSTOMIZATION & BUY MODAL
+         ========================================================================= */}
+      {isOutfitModalOpen && (
+        <div
+          className="dark-outfit-modal-backdrop"
+          onClick={() => setIsOutfitModalOpen(false)}
+        >
+          <div
+            className="dark-outfit-modal"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="outfit-modal-title"
+          >
+            {/* Modal Header */}
+            <div className="dark-outfit-modal-header">
+              <div className="outfit-modal-title-group">
+                <div className="outfit-modal-pill">
+                  <Sparkles size={13} className="text-amber-400" />
+                  <span>AI Curated 3-Piece Ensemble</span>
+                </div>
+                <h3 id="outfit-modal-title" className="outfit-modal-heading">
+                  Complete the Look
+                </h3>
+                <p className="outfit-modal-subtitle">
+                  Inspect each piece, pick your sizes, and review bundle pricing before adding to your bag.
+                </p>
+              </div>
+              <button
+                type="button"
+                className="outfit-modal-close-btn"
+                onClick={() => setIsOutfitModalOpen(false)}
+                aria-label="Close outfit preview"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Modal Scrollable Items List */}
+            <div className="dark-outfit-items-list">
+              {outfitPieces.map((piece) => {
+                const isSelected = outfitSelectedItems[piece.key];
+                const currentSize = outfitSizes[piece.key];
+
+                return (
+                  <div
+                    key={piece.key}
+                    className={`dark-outfit-piece-card ${
+                      isSelected ? "is-selected" : "is-deselected"
+                    }`}
+                  >
+                    {/* Item Top Row */}
+                    <div className="outfit-piece-top">
+                      <label
+                        className="outfit-checkbox-container"
+                        title="Include/Exclude this item"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={(e) => {
+                            setOutfitSelectedItems((prev) => ({
+                              ...prev,
+                              [piece.key]: e.target.checked,
+                            }));
+                          }}
+                        />
+                        <span className="outfit-checkbox-custom">
+                          {isSelected && <Check size={13} strokeWidth={3} />}
+                        </span>
+                      </label>
+
+                      <div className="outfit-piece-image-wrap">
+                        <img src={piece.image} alt={piece.name} />
+                        <span className="outfit-piece-tag">{piece.tag}</span>
+                      </div>
+
+                      <div className="outfit-piece-info">
+                        <div className="outfit-piece-meta">
+                          <span className="outfit-piece-cat">{piece.category}</span>
+                          <span className="outfit-piece-price">
+                            ₹{piece.price.toLocaleString("en-IN")}
+                          </span>
+                        </div>
+                        <h4 className="outfit-piece-title">{piece.name}</h4>
+                        <p className="outfit-piece-desc">{piece.desc}</p>
+                      </div>
+                    </div>
+
+                    {/* Size Selector Section */}
+                    {isSelected && (
+                      <div className="outfit-piece-size-section">
+                        <div className="outfit-size-header">
+                          <span className="outfit-size-title">
+                            {piece.sizeType}:
+                          </span>
+                          <span className="outfit-size-current">
+                            Selected: <strong>{currentSize}</strong>
+                          </span>
+                        </div>
+
+                        <div className="outfit-size-pills-row">
+                          {piece.sizes.map((size) => {
+                            const active = currentSize === size;
+                            return (
+                              <button
+                                key={size}
+                                type="button"
+                                className={`outfit-size-btn ${active ? "active" : ""}`}
+                                onClick={() => {
+                                  setOutfitSizes((prev) => ({
+                                    ...prev,
+                                    [piece.key]: size,
+                                  }));
+                                }}
+                              >
+                                {size}
+                                {active && <Check size={11} className="outfit-size-check" />}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Modal Bottom / Summary & Action Bar */}
+            <div className="dark-outfit-modal-footer">
+              <div className="outfit-footer-summary">
+                <div className="outfit-summary-badges">
+                  {outfitPricing.isFullBundle ? (
+                    <span className="outfit-discount-tag">
+                      🏷️ 10% Bundle Discount Applied (-₹{outfitPricing.discountAmount.toLocaleString("en-IN")})
+                    </span>
+                  ) : (
+                    <span className="outfit-selection-tag">
+                      {outfitPricing.selectedCount} of 3 Items Selected
+                    </span>
+                  )}
+                  <span className="outfit-delivery-tag">
+                    <Truck size={12} /> Free Express Delivery
+                  </span>
+                </div>
+
+                <div className="outfit-total-price-box">
+                  <span className="outfit-total-label">Total Outfit Price:</span>
+                  <div className="outfit-price-numbers">
+                    {outfitPricing.discountAmount > 0 && (
+                      <span className="outfit-original-price">
+                        ₹{outfitPricing.originalTotal.toLocaleString("en-IN")}
+                      </span>
+                    )}
+                    <span className="outfit-final-price">
+                      ₹{outfitPricing.finalTotal.toLocaleString("en-IN")}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="outfit-footer-actions">
+                <button
+                  type="button"
+                  className="outfit-btn-add-bag"
+                  onClick={() => handleConfirmOutfitCart({ checkout: false })}
+                  disabled={outfitPricing.selectedCount === 0}
+                >
+                  <ShoppingBag size={17} />
+                  <span>Add Outfit to Bag</span>
+                </button>
+                <button
+                  type="button"
+                  className="outfit-btn-buy-now"
+                  onClick={() => handleConfirmOutfitCart({ checkout: true })}
+                  disabled={outfitPricing.selectedCount === 0}
+                >
+                  <Zap size={17} />
+                  <span>Buy Now ⚡</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
