@@ -1,4 +1,5 @@
 import "./globals.css";
+import "./product-dark.css";
 import { Toaster } from "sonner";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Playfair_Display, Cormorant_Garamond, Plus_Jakarta_Sans } from "next/font/google";
