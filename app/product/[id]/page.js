@@ -71,7 +71,7 @@ export default function ProductPage({ params }) {
   const [recentlyViewedList, setRecentlyViewedList] = useState([]);
 
   const mainStageRef = useRef(null);
-  const chatMessagesEndRef = useRef(null);
+  const chatStreamRef = useRef(null);
 
   // AI Stylist chat conversation inside the right column panel
   const [aiChatMessages, setAiChatMessages] = useState([
@@ -154,9 +154,14 @@ export default function ProductPage({ params }) {
     }
   }, [product]);
 
-  // Auto-scroll chat on new message
+  // Auto-scroll chat internally on new message (never scroll outer window)
   useEffect(() => {
-    chatMessagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (chatStreamRef.current) {
+      chatStreamRef.current.scrollTo({
+        top: chatStreamRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
   }, [aiChatMessages, aiTyping]);
 
   // Scroll listener for sticky buy bar
@@ -628,12 +633,8 @@ export default function ProductPage({ params }) {
         ]);
         setAiTyping(false);
 
-        // Switch bottom tab to 'Similar Products' and smooth scroll
+        // Switch bottom tab to 'Similar Products' in background without moving page
         setActiveBottomTab("Similar Products");
-        toast.success("Switched to 'Similar Products' below ✨");
-        setTimeout(() => {
-          document.getElementById("bottom-tabs-section")?.scrollIntoView({ behavior: "smooth" });
-        }, 300);
       }, 550);
       return;
     }
@@ -1141,7 +1142,7 @@ export default function ProductPage({ params }) {
             </div>
 
             {/* Chat Messages Body */}
-            <div className="ai-stylist-chat-stream">
+            <div className="ai-stylist-chat-stream" ref={chatStreamRef}>
               {aiChatMessages.map((msg) => (
                 <div
                   key={msg.id}
@@ -1178,11 +1179,11 @@ export default function ProductPage({ params }) {
                       className="ai-chat-action-btn"
                       onClick={() => {
                         setActiveBottomTab("Similar Products");
-                        document.getElementById("bottom-tabs-section")?.scrollIntoView({ behavior: "smooth" });
+                        toast.success("Similar Products tab updated below ✨");
                       }}
                     >
-                      <ArrowDown size={12} />
-                      <span>Explore Similar Products Below</span>
+                      <Sparkles size={12} />
+                      <span>Similar Products Tab Updated ✨</span>
                     </button>
                   )}
 
@@ -1191,11 +1192,11 @@ export default function ProductPage({ params }) {
                       type="button"
                       className="ai-chat-action-btn"
                       onClick={() => {
-                        document.getElementById("complete-the-look-section")?.scrollIntoView({ behavior: "smooth" });
+                        toast.success("Curated with 'Complete the Look' outfit below ✨");
                       }}
                     >
                       <Shirt size={12} />
-                      <span>View 'Complete the Look' Outfit 👖</span>
+                      <span>Matching Outfit Curated 👖</span>
                     </button>
                   )}
                 </div>
@@ -1208,7 +1209,6 @@ export default function ProductPage({ params }) {
                   <span className="typing-dot" />
                 </div>
               )}
-              <div ref={chatMessagesEndRef} />
             </div>
 
             {/* 5 Quick Prompt Chips */}
