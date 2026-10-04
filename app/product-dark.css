@@ -8,6 +8,9 @@
   min-height: 100vh;
   font-family: var(--font-jakarta), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 /* Dark Navbar Overrides */
@@ -1292,9 +1295,224 @@
   color: #f59e0b;
 }
 
-/* AI Reviews Container */
+/* ==========================================================================
+   AI REVIEWS WRAPPER (DARK THEME & ULTRA-CRISP HIGH-DPI TYPOGRAPHY)
+   ========================================================================== */
 .dark-reviews-wrapper {
   margin-top: 50px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+.dark-reviews-wrapper .ai-review-section {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 40px 0 20px;
+}
+
+.dark-reviews-wrapper .ai-pill-tag {
+  background: rgba(245, 158, 11, 0.14);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #fbbf24;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 5px 14px;
+  border-radius: 9999px;
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.15);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.dark-reviews-wrapper .ai-main-title {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: #ffffff;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #e2e8f0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 2px 20px rgba(255, 255, 255, 0.12);
+  margin: 0;
+  line-height: 1.2;
+}
+
+.dark-reviews-wrapper .ai-subtitle {
+  font-size: 13.5px;
+  color: #94a3b8;
+  margin-top: 6px;
+  font-weight: 500;
+  letter-spacing: 0.2px;
+}
+
+.dark-reviews-wrapper .ai-write-btn {
+  background: #141724;
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  color: #ffffff;
+  border-radius: 9999px;
+  padding: 10px 22px;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dark-reviews-wrapper .ai-write-btn:hover {
+  background: #1b2032;
+  border-color: #8b5cf6;
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 22px rgba(139, 92, 246, 0.25);
+}
+
+.dark-reviews-wrapper .ai-summary-card {
+  background: #10131d;
+  border: 1px solid #1c2232;
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.65);
+  margin-bottom: 40px;
+}
+
+.dark-reviews-wrapper .ai-verdict-box {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.dark-reviews-wrapper .ai-score-column {
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.dark-reviews-wrapper .ai-score-big {
+  font-size: 52px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -1px;
+}
+
+.dark-reviews-wrapper .ai-sentiment-badge {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 6px;
+}
+
+.dark-reviews-wrapper .ai-verdict-text h4 {
+  color: #f59e0b;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.9px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.dark-reviews-wrapper .ai-verdict-text p {
+  color: #e2e8f0;
+  font-size: 14.5px;
+  line-height: 1.65;
+  font-weight: 400;
+}
+
+.dark-reviews-wrapper .ai-insight-column {
+  background: #141724;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+}
+
+.dark-reviews-wrapper .insight-col-header {
+  color: #ffffff;
+  font-size: 13.5px;
+  font-weight: 700;
+}
+
+.dark-reviews-wrapper .insight-list li {
+  color: #cbd5e1;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.dark-reviews-wrapper .ai-fit-meter {
+  background: #141724;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+}
+
+.dark-reviews-wrapper .fit-title {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.dark-reviews-wrapper .fit-advice-pill {
+  background: #0f121c;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #e2e8f0;
+}
+
+.dark-reviews-wrapper .fit-meter-track {
+  background: #0f121c;
+}
+
+.dark-reviews-wrapper .fit-meter-legend {
+  color: #94a3b8;
+}
+
+.dark-reviews-wrapper .customer-reviews-title {
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.dark-reviews-wrapper .review-item-card {
+  background: #10131d;
+  border: 1px solid #1c2232;
+  border-radius: 14px;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.dark-reviews-wrapper .review-item-card:hover {
+  transform: translateY(-2px);
+  border-color: #2b334a;
+}
+
+.dark-reviews-wrapper .review-avatar {
+  background: #191e2c;
+  color: #ffffff;
+  font-weight: 800;
+}
+
+.dark-reviews-wrapper .review-author-wrap strong {
+  color: #ffffff;
+  font-size: 13px;
+}
+
+.dark-reviews-wrapper .review-item-title {
+  color: #ffffff;
+  font-size: 14.5px;
+  font-weight: 700;
+}
+
+.dark-reviews-wrapper .review-item-body {
+  color: #cbd5e1;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.dark-reviews-wrapper .review-footer-tags {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.dark-reviews-wrapper .review-fit-tag {
+  background: #181d2a;
+  color: #cbd5e1;
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 /* ==========================================================================
