@@ -647,8 +647,7 @@ export default function ProductPage({ params }) {
           {
             id: `ai-${Date.now()}`,
             sender: "ai",
-            text: `✨ Denim Styling Guide for ${product?.name || "Air Jordan 1 Low"}:\n\n• Slim / Straight Dark Indigo: Clean, tailored, elevated look.\n• Washed Black Denim: High-contrast urban street aesthetic.\n• Relaxed Cargo Denim: On-trend 90s relaxed silhouette.\n\n👉 See our curated outfit in 'Complete the Look' below:`,
-            outfitPreview: true,
+            text: `✨ Denim Styling Guide for ${product?.name || "Air Jordan 1 Low"}:\n\n• Slim / Straight Dark Indigo: Clean, tailored, elevated look.\n• Washed Black Denim: High-contrast urban street aesthetic.\n• Relaxed Cargo Denim: On-trend 90s relaxed silhouette.`,
           },
         ]);
         setAiTyping(false);
@@ -1172,33 +1171,6 @@ export default function ProductPage({ params }) {
                     </div>
                   )}
 
-                  {/* Quick Action Button inside chat */}
-                  {msg.action === "view_similar_tab" && (
-                    <button
-                      type="button"
-                      className="ai-chat-action-btn"
-                      onClick={() => {
-                        setActiveBottomTab("Similar Products");
-                        toast.success("Similar Products tab updated below ✨");
-                      }}
-                    >
-                      <Sparkles size={12} />
-                      <span>Similar Products Tab Updated ✨</span>
-                    </button>
-                  )}
-
-                  {msg.outfitPreview && (
-                    <button
-                      type="button"
-                      className="ai-chat-action-btn"
-                      onClick={() => {
-                        toast.success("Curated with 'Complete the Look' outfit below ✨");
-                      }}
-                    >
-                      <Shirt size={12} />
-                      <span>Matching Outfit Curated 👖</span>
-                    </button>
-                  )}
                 </div>
               ))}
 

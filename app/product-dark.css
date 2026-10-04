@@ -98,7 +98,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.95fr) minmax(0, 0.85fr);
   gap: 28px;
-  align-items: stretch;
+  align-items: start;
   margin-bottom: 34px;
 }
 
@@ -708,21 +708,22 @@
   background: #10131d;
   border: 1.5px solid rgba(139, 92, 246, 0.4);
   border-radius: 20px;
-  padding: 22px;
+  padding: 18px 20px;
   box-shadow: 0 0 35px rgba(139, 92, 246, 0.18), inset 0 0 25px rgba(139, 92, 246, 0.04);
   display: flex;
   flex-direction: column;
-  height: 100%;
-  min-height: 640px;
+  height: 590px;
+  max-height: 590px;
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 .ai-stylist-header {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 16px;
-  padding-bottom: 12px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
   border-bottom: 1px solid rgba(139, 92, 246, 0.15);
   flex-shrink: 0;
 }
@@ -758,31 +759,31 @@
   flex-direction: column;
   gap: 10px;
   flex: 1;
-  min-height: 250px;
-  max-height: 480px;
+  min-height: 0;
   overflow-y: auto;
   overscroll-behavior: contain;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
   padding-right: 6px;
   scrollbar-width: thin;
-  scrollbar-color: rgba(139, 92, 246, 0.4) transparent;
+  scrollbar-color: #8b5cf6 rgba(255, 255, 255, 0.06);
 }
 
 .ai-stylist-chat-stream::-webkit-scrollbar {
-  width: 5px;
+  width: 6px;
 }
 
 .ai-stylist-chat-stream::-webkit-scrollbar-track {
-  background: transparent;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 9999px;
 }
 
 .ai-stylist-chat-stream::-webkit-scrollbar-thumb {
-  background: rgba(139, 92, 246, 0.4);
+  background: #8b5cf6;
   border-radius: 9999px;
 }
 
 .ai-stylist-chat-stream::-webkit-scrollbar-thumb:hover {
-  background: rgba(139, 92, 246, 0.7);
+  background: #a78bfa;
 }
 
 .ai-stylist-bubble {
