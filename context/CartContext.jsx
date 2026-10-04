@@ -55,7 +55,7 @@ export function CartProvider({ children }) {
     );
 
   // Add product to cart with size/variant awareness
-  const addToCart = (product, quantity = 1) => {
+  const addToCart = (product, quantity = 1, options = {}) => {
     const amount = Math.max(1, Number(quantity) || 1);
     const itemKey = getItemKey(product);
 
@@ -83,13 +83,15 @@ export function CartProvider({ children }) {
       ];
     });
 
-    // Notify user with sonner toast
-    const itemName = product?.name || "Item";
-    const variantTag = product?.variantLabel ? ` (${product.variantLabel})` : "";
-    toast.success("Added to bag! 🛍️", {
-      description: `${itemName}${variantTag} (×${amount}) has been added to your shopping bag.`,
-      duration: 3500,
-    });
+    // Notify user with sonner toast unless explicitly silent
+    if (!options?.silent) {
+      const itemName = product?.name || "Item";
+      const variantTag = product?.variantLabel ? ` (${product.variantLabel})` : "";
+      toast.success("Added to bag! 🛍️", {
+        description: `${itemName}${variantTag} (×${amount}) has been added to your shopping bag.`,
+        duration: 3500,
+      });
+    }
   };
 
   // Remove product by id or cart item key

@@ -296,7 +296,6 @@ export default function ProductPage({ params }) {
 
     addToCart(cartProduct, quantity);
     setAddedRecently(true);
-    toast.success(`${product.name} (Size: ${selectedVariant}) added to Bag! ✨`);
     setTimeout(() => setAddedRecently(false), 2400);
   };
 
@@ -311,25 +310,42 @@ export default function ProductPage({ params }) {
 
   // Add Complete Outfit
   const handleBuyCompleteOutfit = () => {
-    handleAddToCart();
-    addToCart({
-      id: 991,
-      name: "Vintage Washed Indigo Denim Jeans",
-      price: 2499,
-      image: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=400&q=80",
-      category: "Men",
-      subcategory: "Jeans",
-    }, 1);
-    addToCart({
-      id: 992,
-      name: "Heavyweight Boxy Tee & Snapback Cap Set",
-      price: 1899,
-      image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=400&q=80",
-      category: "Men",
-      subcategory: "T-Shirts",
-    }, 1);
+    const cartProduct = {
+      ...product,
+      selectedVariant: activeVariant || { label: selectedVariant },
+      variantLabel: selectedVariant,
+      color: selectedColor,
+    };
 
-    toast.success("Complete 3-Piece Outfit added to Bag! Total: ₹11,998 ✨");
+    addToCart(cartProduct, quantity, { silent: true });
+    addToCart(
+      {
+        id: 991,
+        name: "Vintage Washed Indigo Denim Jeans",
+        price: 2499,
+        image: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=400&q=80",
+        category: "Men",
+        subcategory: "Jeans",
+      },
+      1,
+      { silent: true }
+    );
+    addToCart(
+      {
+        id: 992,
+        name: "Heavyweight Boxy Tee & Snapback Cap Set",
+        price: 1899,
+        image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=400&q=80",
+        category: "Men",
+        subcategory: "T-Shirts",
+      },
+      1,
+      { silent: true }
+    );
+
+    toast.success("Complete 3-Piece Outfit added to Bag! 🛍️", {
+      description: "Air Jordan 1 Low + Indigo Jeans + Boxy Tee Set (Total: ₹11,998)",
+    });
   };
 
   // Share functionality
@@ -406,10 +422,10 @@ export default function ProductPage({ params }) {
     const defaultSimilar = [
       {
         id: 104,
-        name: "Low OG Dark Mocha Travis Scott x AJ1 Low",
+        name: "Travis Scott x AJ1 Low",
         price: 8200,
         rating: 4.9,
-        image: "https://sneakernews.com/wp-content/uploads/2022/09/travis-scott-jordan-1-low-og-black-phantom-DM7866-001-2.jpg?w=1200",
+        image: "https://images.unsplash.com/photo-1552346154-21d32810aba3?w=600&q=80",
         category: "Footwear",
         badge: "Similar Silhouette",
       },
@@ -451,7 +467,7 @@ export default function ProductPage({ params }) {
       },
       {
         id: 115,
-        name: "Batman: The Dark Knight 3.0",
+        name: "Batman: Dark Knight 3.0",
         price: 15699,
         rating: 4.7,
         image: "https://prod-img.thesouledstore.com/public/theSoul/uploads/catalog/product/1787831692_8900888.jpg?w=480&dpr=2",
@@ -461,15 +477,29 @@ export default function ProductPage({ params }) {
     ];
 
     if (Array.isArray(relatedProducts) && relatedProducts.length > 0) {
-      const dbMapped = relatedProducts.map((p) => ({
-        id: p.id,
-        name: p.name,
-        price: Number(p.price) || 8200,
-        rating: 4.8,
-        image: p.image || p.image_url || "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=600&q=80",
-        category: p.category || "Footwear",
-        badge: "Similar Silhouette",
-      }));
+      const dbMapped = relatedProducts.map((p) => {
+        let cleanName = p.name || "Sneaker";
+        if (cleanName.toLowerCase().includes("travis scott")) {
+          cleanName = "Travis Scott x AJ1 Low";
+        } else if (cleanName.length > 25) {
+          cleanName = cleanName.slice(0, 24) + "...";
+        }
+
+        let cleanImage = p.image || p.image_url;
+        if (!cleanImage || cleanImage.includes("sneakernews.com")) {
+          cleanImage = "https://images.unsplash.com/photo-1552346154-21d32810aba3?w=600&q=80";
+        }
+
+        return {
+          id: p.id,
+          name: cleanName,
+          price: Number(p.price) || 8200,
+          rating: 4.8,
+          image: cleanImage,
+          category: p.category || "Footwear",
+          badge: "Similar Silhouette",
+        };
+      });
       const extra = defaultSimilar.filter(
         (s) => !dbMapped.some((d) => String(d.id) === String(s.id))
       );
