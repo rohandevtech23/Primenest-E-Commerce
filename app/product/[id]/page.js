@@ -1,7 +1,7 @@
 "use client";
 
 import { useWishlist } from "@/context/WishlistContext";
-import { use, useEffect, useState, useRef } from "react";
+import { use, useEffect, useState, useRef, useMemo } from "react";
 import { useCart } from "@/context/CartContext";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
@@ -38,6 +38,7 @@ import {
   Shirt,
   Smartphone,
   CheckCircle2,
+  ArrowDown,
 } from "lucide-react";
 import { toast } from "sonner";
 import VirtualTryOnModal from "@/components/VirtualTryOnModal";
@@ -67,6 +68,7 @@ export default function ProductPage({ params }) {
   const [inPageQuery, setInPageQuery] = useState("");
   const [aiTyping, setAiTyping] = useState(false);
   const [showStickyBar, setShowStickyBar] = useState(false);
+  const [recentlyViewedList, setRecentlyViewedList] = useState([]);
 
   const mainStageRef = useRef(null);
   const chatMessagesEndRef = useRef(null);
@@ -127,6 +129,35 @@ export default function ProductPage({ params }) {
 
     fetchProduct();
   }, [id]);
+
+  // Track recently viewed products in localStorage
+  useEffect(() => {
+    if (!product || !product.id) return;
+    try {
+      const raw = localStorage.getItem("primenest_recently_viewed");
+      let list = raw ? JSON.parse(raw) : [];
+      list = list.filter((p) => String(p.id) !== String(product.id));
+      list.unshift({
+        id: product.id,
+        name: product.name,
+        price: Number(product.price) || 7600,
+        rating: 4.8,
+        image: product.image || "https://i.pinimg.com/736x/09/b9/dd/09b9dd42e8bb0fddd551ae5bbba36cbf.jpg",
+        category: product.category || "Footwear",
+        badge: "Recently Viewed",
+      });
+      list = list.slice(0, 10);
+      localStorage.setItem("primenest_recently_viewed", JSON.stringify(list));
+      setRecentlyViewedList(list);
+    } catch (err) {
+      console.error("Recently viewed save error:", err);
+    }
+  }, [product]);
+
+  // Auto-scroll chat on new message
+  useEffect(() => {
+    chatMessagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [aiChatMessages, aiTyping]);
 
   // Scroll listener for sticky buy bar
   useEffect(() => {
@@ -281,7 +312,6 @@ export default function ProductPage({ params }) {
   // Add Complete Outfit
   const handleBuyCompleteOutfit = () => {
     handleAddToCart();
-    // Add curated jeans
     addToCart({
       id: 991,
       name: "Vintage Washed Indigo Denim Jeans",
@@ -290,7 +320,6 @@ export default function ProductPage({ params }) {
       category: "Men",
       subcategory: "Jeans",
     }, 1);
-    // Add curated t-shirt & cap set
     addToCart({
       id: 992,
       name: "Heavyweight Boxy Tee & Snapback Cap Set",
@@ -313,44 +342,10 @@ export default function ProductPage({ params }) {
     }
   };
 
-  // AI Stylist Chat handler
-  const handleSendChatMessage = (queryText) => {
-    const q = (queryText || inPageQuery || "").trim();
-    if (!q) return;
-
-    const userMsg = { id: `u-${Date.now()}`, sender: "user", text: q };
-    setAiChatMessages((prev) => [...prev, userMsg]);
-    setInPageQuery("");
-    setAiTyping(true);
-
-    setTimeout(() => {
-      let reply = "";
-      const lower = q.toLowerCase();
-
-      if (lower.includes("daily") || lower.includes("workout") || lower.includes("gym")) {
-        reply = "Yes! The Air Jordan 1 Low is crafted with lightweight foam and encapsulated Nike Air cushioning, making it exceptionally comfortable and durable for daily casual rotation and light activity.";
-      } else if (lower.includes("similar") || lower.includes("alternative")) {
-        reply = "Top matches in stock: Nike Dunk Low (₹8,499), Adidas Campus 00s (₹7,999), and Puma Palermo (₹6,299). Scroll down to 'Recommended by AI' to compare silhouettes side-by-side!";
-      } else if (lower.includes("jean") || lower.includes("denim") || lower.includes("pant")) {
-        reply = "Absolutely! The Grey White colorway is one of the most versatile sneakers. It pairs effortlessly with relaxed straight-leg indigo denim, washed black jeans, or vintage cargo pants. Check 'Complete the Look' for our curated pairing!";
-      } else if (lower.includes("cheap") || lower.includes("budget") || lower.includes("price")) {
-        reply = "Great budget alternatives with the identical low-profile court aesthetic: Nike Court Vision Low at ₹5,999 or Puma Palermo at ₹6,299. Both deliver the same premium street presence!";
-      } else if (lower.includes("dunk") || lower.includes("compare")) {
-        reply = "Both share iconic 1985 basketball DNA. However, the Air Jordan 1 Low features a sleeker, more tapered toe profile and encapsulated Air-Sole heel cushioning, whereas the Dunk Low has a wider cupsole fit.";
-      } else {
-        reply = `The ${product?.name || "Air Jordan 1 Low"} is rated 4.8/5 by 234 verified buyers with a 98% fit confidence. Would you like me to reserve your size ${selectedVariant} in your shopping bag?`;
-      }
-
-      setAiChatMessages((prev) => [
-        ...prev,
-        { id: `ai-${Date.now()}`, sender: "ai", text: reply },
-      ]);
-      setAiTyping(false);
-    }, 650);
-  };
-
-  // Bottom Recommended Products (matching screenshot)
-  const bottomRecommendedSneakers = [
+  // =========================================================================
+  // CATALOG DATA FOR EACH TAB
+  // =========================================================================
+  const aiRecommendedProducts = [
     {
       id: 104,
       name: "Nike Dunk Low",
@@ -358,7 +353,7 @@ export default function ProductPage({ params }) {
       rating: 4.7,
       image: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=600&q=80",
       category: "Footwear",
-      subcategory: "Men's Sneakers",
+      badge: "98% AI Match",
     },
     {
       id: 105,
@@ -367,7 +362,7 @@ export default function ProductPage({ params }) {
       rating: 4.5,
       image: "https://images.puma.com/image/upload/f_auto,q_auto,b_rgb:fafafa,w_750,h_750/global/402692/02/sv01/fnd/IND/fmt/png/Palermo-Leather-Sneakers",
       category: "Footwear",
-      subcategory: "Men's Casual Shoes",
+      badge: "96% AI Match",
     },
     {
       id: 106,
@@ -376,7 +371,7 @@ export default function ProductPage({ params }) {
       rating: 4.6,
       image: "https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?w=600&q=80",
       category: "Footwear",
-      subcategory: "Men's Sneakers",
+      badge: "95% AI Match",
     },
     {
       id: 101,
@@ -385,7 +380,7 @@ export default function ProductPage({ params }) {
       rating: 4.8,
       image: "https://i.pinimg.com/1200x/39/0e/d7/390ed756a6c663cd8f55457165cc7bf5.jpg",
       category: "Footwear",
-      subcategory: "Men's Sneakers",
+      badge: "97% AI Match",
     },
     {
       id: 107,
@@ -394,7 +389,7 @@ export default function ProductPage({ params }) {
       rating: 4.4,
       image: "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?w=600&q=80",
       category: "Footwear",
-      subcategory: "Men's Sneakers",
+      badge: "93% AI Match",
     },
     {
       id: 108,
@@ -403,9 +398,338 @@ export default function ProductPage({ params }) {
       rating: 4.5,
       image: "https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=600&q=80",
       category: "Footwear",
-      subcategory: "Men's Casual Shoes",
+      badge: "94% AI Match",
     },
   ];
+
+  const similarSneakerProducts = useMemo(() => {
+    const defaultSimilar = [
+      {
+        id: 104,
+        name: "Low OG Dark Mocha Travis Scott x AJ1 Low",
+        price: 8200,
+        rating: 4.9,
+        image: "https://sneakernews.com/wp-content/uploads/2022/09/travis-scott-jordan-1-low-og-black-phantom-DM7866-001-2.jpg?w=1200",
+        category: "Footwear",
+        badge: "Similar Silhouette",
+      },
+      {
+        id: 101,
+        name: "Air Jordan 1 High OG",
+        price: 9500,
+        rating: 4.9,
+        image: "https://i.pinimg.com/1200x/39/0e/d7/390ed756a6c663cd8f55457165cc7bf5.jpg",
+        category: "Footwear",
+        badge: "Jordan Heritage",
+      },
+      {
+        id: 103,
+        name: "Air Jordan 3 Retro",
+        price: 12500,
+        rating: 4.8,
+        image: "https://i.pinimg.com/736x/ac/dd/4a/acdd4adacb1d82d89ead17aaf03020e9.jpg",
+        category: "Footwear",
+        badge: "Classic Air",
+      },
+      {
+        id: 107,
+        name: "Nike Court Vision Low",
+        price: 5999,
+        rating: 4.4,
+        image: "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?w=600&q=80",
+        category: "Footwear",
+        badge: "Cheaper Option",
+      },
+      {
+        id: 105,
+        name: "Puma Palermo Leather",
+        price: 6299,
+        rating: 4.5,
+        image: "https://images.puma.com/image/upload/f_auto,q_auto,b_rgb:fafafa,w_750,h_750/global/402692/02/sv01/fnd/IND/fmt/png/Palermo-Leather-Sneakers",
+        category: "Footwear",
+        badge: "Similar Low-Top",
+      },
+      {
+        id: 115,
+        name: "Batman: The Dark Knight 3.0",
+        price: 15699,
+        rating: 4.7,
+        image: "https://prod-img.thesouledstore.com/public/theSoul/uploads/catalog/product/1787831692_8900888.jpg?w=480&dpr=2",
+        category: "Footwear",
+        badge: "Limited Edition",
+      },
+    ];
+
+    if (Array.isArray(relatedProducts) && relatedProducts.length > 0) {
+      const dbMapped = relatedProducts.map((p) => ({
+        id: p.id,
+        name: p.name,
+        price: Number(p.price) || 8200,
+        rating: 4.8,
+        image: p.image || p.image_url || "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=600&q=80",
+        category: p.category || "Footwear",
+        badge: "Similar Silhouette",
+      }));
+      const extra = defaultSimilar.filter(
+        (s) => !dbMapped.some((d) => String(d.id) === String(s.id))
+      );
+      return [...dbMapped, ...extra].slice(0, 6);
+    }
+    return defaultSimilar;
+  }, [relatedProducts]);
+
+  const youMayAlsoLikeProducts = [
+    {
+      id: 991,
+      name: "Vintage Washed Indigo Denim Jeans",
+      price: 2499,
+      rating: 4.8,
+      image: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=600&q=80",
+      category: "Men",
+      badge: "Denim Pairing",
+    },
+    {
+      id: 992,
+      name: "Heavyweight Boxy Tee & Snapback Cap Set",
+      price: 1899,
+      rating: 4.7,
+      image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=600&q=80",
+      category: "Men",
+      badge: "Complete Look",
+    },
+    {
+      id: 993,
+      name: "Atelier French Terry Oversized Hoodie",
+      price: 3499,
+      rating: 4.9,
+      image: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=600&q=80",
+      category: "Men",
+      badge: "Streetwear",
+    },
+    {
+      id: 994,
+      name: "Minimalist Relaxed Utility Cargo Pants",
+      price: 2999,
+      rating: 4.6,
+      image: "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=600&q=80",
+      category: "Men",
+      badge: "Trending",
+    },
+    {
+      id: 995,
+      name: "PrimeNest Extrait de Parfum (100ml)",
+      price: 4200,
+      rating: 4.9,
+      image: "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=600&q=80",
+      category: "Perfume",
+      badge: "Luxury Fragrance",
+    },
+    {
+      id: 996,
+      name: "Jordan Heritage Flight Bomber Jacket",
+      price: 6800,
+      rating: 4.8,
+      image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=600&q=80",
+      category: "Men",
+      badge: "Flight Collection",
+    },
+  ];
+
+  // Dynamic active tab product retriever
+  const currentTabProducts = useMemo(() => {
+    switch (activeBottomTab) {
+      case "Similar Products":
+        return similarSneakerProducts;
+      case "You May Also Like":
+        return youMayAlsoLikeProducts;
+      case "Recently Viewed":
+        return recentlyViewedList.length > 0 ? recentlyViewedList : similarSneakerProducts;
+      case "Recommended by AI":
+      default:
+        return aiRecommendedProducts;
+    }
+  }, [activeBottomTab, similarSneakerProducts, recentlyViewedList]);
+
+  // =========================================================================
+  // AI STYLIST CHAT LOGIC (RESPONSIVE CHIPS & REAL AI REPLIES)
+  // =========================================================================
+  const handleSendChatMessage = async (queryText) => {
+    const q = (queryText || inPageQuery || "").trim();
+    if (!q) return;
+
+    const userMsg = { id: `u-${Date.now()}`, sender: "user", text: q };
+    setAiChatMessages((prev) => [...prev, userMsg]);
+    setInPageQuery("");
+    setAiTyping(true);
+
+    const lower = q.toLowerCase();
+
+    // 1. Similar sneakers query
+    if (lower.includes("similar") || lower.includes("alternative")) {
+      setTimeout(() => {
+        setAiChatMessages((prev) => [
+          ...prev,
+          {
+            id: `ai-${Date.now()}`,
+            sender: "ai",
+            text: `Here are the top 3 similar sneakers for ${product?.name || "Air Jordan 1 Low"} based on silhouette, leather craftsmanship & street presence:`,
+            products: [
+              {
+                id: 104,
+                name: "Nike Dunk Low",
+                price: "₹8,499",
+                image: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=400&q=80",
+              },
+              {
+                id: 105,
+                name: "Puma Palermo",
+                price: "₹6,299",
+                image: "https://images.puma.com/image/upload/f_auto,q_auto,b_rgb:fafafa,w_750,h_750/global/402692/02/sv01/fnd/IND/fmt/png/Palermo-Leather-Sneakers",
+              },
+              {
+                id: 106,
+                name: "Adidas Campus 00s",
+                price: "₹7,999",
+                image: "https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?w=400&q=80",
+              },
+            ],
+            action: "view_similar_tab",
+          },
+        ]);
+        setAiTyping(false);
+
+        // Switch bottom tab to 'Similar Products' and smooth scroll
+        setActiveBottomTab("Similar Products");
+        toast.success("Switched to 'Similar Products' below ✨");
+        setTimeout(() => {
+          document.getElementById("bottom-tabs-section")?.scrollIntoView({ behavior: "smooth" });
+        }, 300);
+      }, 550);
+      return;
+    }
+
+    // 2. Jeans query
+    if (lower.includes("jean") || lower.includes("denim") || lower.includes("pant")) {
+      setTimeout(() => {
+        setAiChatMessages((prev) => [
+          ...prev,
+          {
+            id: `ai-${Date.now()}`,
+            sender: "ai",
+            text: `✨ Denim Styling Guide for ${product?.name || "Air Jordan 1 Low"}:\n\n• Slim / Straight Dark Indigo: Clean, tailored, elevated look.\n• Washed Black Denim: High-contrast urban street aesthetic.\n• Relaxed Cargo Denim: On-trend 90s relaxed silhouette.\n\n👉 See our curated outfit in 'Complete the Look' below:`,
+            outfitPreview: true,
+          },
+        ]);
+        setAiTyping(false);
+      }, 550);
+      return;
+    }
+
+    // 3. Cheaper options query
+    if (lower.includes("cheap") || lower.includes("budget") || lower.includes("price") || lower.includes("under")) {
+      setTimeout(() => {
+        setAiChatMessages((prev) => [
+          ...prev,
+          {
+            id: `ai-${Date.now()}`,
+            sender: "ai",
+            text: `Here are great budget-friendly alternatives with the identical low-profile court silhouette:`,
+            products: [
+              {
+                id: 107,
+                name: "Nike Court Vision Low",
+                price: "₹5,999",
+                image: "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?w=400&q=80",
+              },
+              {
+                id: 105,
+                name: "Puma Palermo Sneakers",
+                price: "₹6,299",
+                image: "https://images.puma.com/image/upload/f_auto,q_auto,b_rgb:fafafa,w_750,h_750/global/402692/02/sv01/fnd/IND/fmt/png/Palermo-Leather-Sneakers",
+              },
+            ],
+            action: "view_similar_tab",
+          },
+        ]);
+        setAiTyping(false);
+        setActiveBottomTab("Similar Products");
+      }, 550);
+      return;
+    }
+
+    // 4. Compare with Nike Dunk query
+    if (lower.includes("dunk") || lower.includes("compare")) {
+      setTimeout(() => {
+        setAiChatMessages((prev) => [
+          ...prev,
+          {
+            id: `ai-${Date.now()}`,
+            sender: "ai",
+            text: `⚖️ Air Jordan 1 Low vs Nike Dunk Low:\n\n• Cushioning: AJ1 Low features encapsulated Nike Air-Sole heel cushioning; Dunk Low uses standard EVA foam.\n• Fit & Toe Box: AJ1 Low has a sleeker, more tapered toe profile; Dunk Low has a wider skate cupsole.\n• Heritage: AJ1 was Michael Jordan's 1985 signature sneaker; Dunk was built for 1985 college basketball.`,
+          },
+        ]);
+        setAiTyping(false);
+      }, 550);
+      return;
+    }
+
+    // 5. Daily use query
+    if (lower.includes("daily") || lower.includes("workout") || lower.includes("gym") || lower.includes("college")) {
+      setTimeout(() => {
+        setAiChatMessages((prev) => [
+          ...prev,
+          {
+            id: `ai-${Date.now()}`,
+            sender: "ai",
+            text: `Yes! The ${product?.name || "Air Jordan 1 Low"} is engineered with lightweight foam and encapsulated Nike Air cushioning, making it exceptionally comfortable and durable for daily casual rotation and street wear.`,
+          },
+        ]);
+        setAiTyping(false);
+      }, 550);
+      return;
+    }
+
+    // 6. Generic / Custom Query -> Call real /api/ai/chat API
+    try {
+      const response = await fetch("/api/ai/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: `${q} (Current Product: ${product?.name}, Price: ₹${product?.price}, Category: ${product?.category})`,
+          history: aiChatMessages.slice(-6).map((m) => ({
+            role: m.sender === "user" ? "user" : "assistant",
+            content: m.text,
+          })),
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setAiChatMessages((prev) => [
+          ...prev,
+          {
+            id: `ai-${Date.now()}`,
+            sender: "ai",
+            text: data.reply || `The ${product?.name || "Air Jordan 1 Low"} is rated 4.8/5 by 234 verified buyers with a 98% fit confidence.`,
+            products: Array.isArray(data.products) && data.products.length > 0 ? data.products.slice(0, 3) : null,
+          },
+        ]);
+      } else {
+        throw new Error("AI Stylist API error");
+      }
+    } catch {
+      setAiChatMessages((prev) => [
+        ...prev,
+        {
+          id: `ai-${Date.now()}`,
+          sender: "ai",
+          text: `The ${product?.name || "Air Jordan 1 Low"} features premium leather and responsive cushioning. Available in UK sizes 6-11 with a 98% fit confidence. Would you like me to select UK 9 for you?`,
+        },
+      ]);
+    } finally {
+      setAiTyping(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -795,7 +1119,55 @@ export default function ProductPage({ params }) {
                     msg.sender === "user" ? "user-bubble" : "ai-bubble"
                   }`}
                 >
-                  {msg.text}
+                  <div className="ai-bubble-text">{msg.text}</div>
+
+                  {/* Embedded product recommendations inside AI reply */}
+                  {msg.products && msg.products.length > 0 && (
+                    <div className="ai-chat-products-row">
+                      {msg.products.map((p) => (
+                        <Link
+                          key={p.id}
+                          href={`/product/${p.id}`}
+                          className="ai-mini-product-card"
+                        >
+                          <img src={p.image} alt={p.name} className="ai-mini-thumb" />
+                          <div className="ai-mini-details">
+                            <span className="ai-mini-name">{p.name}</span>
+                            <span className="ai-mini-price">{p.price}</span>
+                          </div>
+                          <span className="ai-mini-view-btn">View ↗</span>
+                        </Link>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Quick Action Button inside chat */}
+                  {msg.action === "view_similar_tab" && (
+                    <button
+                      type="button"
+                      className="ai-chat-action-btn"
+                      onClick={() => {
+                        setActiveBottomTab("Similar Products");
+                        document.getElementById("bottom-tabs-section")?.scrollIntoView({ behavior: "smooth" });
+                      }}
+                    >
+                      <ArrowDown size={12} />
+                      <span>Explore Similar Products Below</span>
+                    </button>
+                  )}
+
+                  {msg.outfitPreview && (
+                    <button
+                      type="button"
+                      className="ai-chat-action-btn"
+                      onClick={() => {
+                        document.getElementById("complete-the-look-section")?.scrollIntoView({ behavior: "smooth" });
+                      }}
+                    >
+                      <Shirt size={12} />
+                      <span>View 'Complete the Look' Outfit 👖</span>
+                    </button>
+                  )}
                 </div>
               ))}
 
@@ -920,7 +1292,7 @@ export default function ProductPage({ params }) {
           </div>
 
           {/* Card 2: Complete the Look */}
-          <div className="dark-feature-card dark-outfit-card">
+          <div id="complete-the-look-section" className="dark-feature-card dark-outfit-card">
             <div className="outfit-card-header">
               <h4 className="suite-card-title">Complete the Look</h4>
             </div>
@@ -987,7 +1359,7 @@ export default function ProductPage({ params }) {
         {/* =========================================================================
             4. BOTTOM SECTION: TABS & RECOMMENDED PRODUCTS GRID
            ========================================================================= */}
-        <section className="dark-bottom-recommendations-section">
+        <section id="bottom-tabs-section" className="dark-bottom-recommendations-section">
           {/* Header & Tabs */}
           <div className="dark-tabs-header-row">
             <div className="dark-recommend-tabs">
@@ -1001,7 +1373,10 @@ export default function ProductPage({ params }) {
                   key={tab}
                   type="button"
                   className={`dark-tab-item ${activeBottomTab === tab ? "active" : ""}`}
-                  onClick={() => setActiveBottomTab(tab)}
+                  onClick={() => {
+                    setActiveBottomTab(tab);
+                    toast.success(`Showing ${tab} ✨`);
+                  }}
                 >
                   {tab}
                 </button>
@@ -1014,18 +1389,23 @@ export default function ProductPage({ params }) {
             </Link>
           </div>
 
-          {/* Product Cards Row (6 items matching screenshot) */}
-          <div className="dark-products-carousel-row">
-            {bottomRecommendedSneakers.map((item) => {
+          {/* Dynamic Product Cards Grid based on selected tab */}
+          <div className="dark-products-carousel-row" key={activeBottomTab}>
+            {currentTabProducts.map((item) => {
               const isItemWishlisted = wishlist.some((w) => w.id === item.id);
               return (
                 <div key={item.id} className="dark-sneaker-card">
+                  {/* Category / AI Tag */}
+                  {item.badge && (
+                    <span className="sneaker-card-badge">{item.badge}</span>
+                  )}
+
                   {/* Top Heart Icon */}
                   <button
                     type="button"
                     className="sneaker-card-heart"
                     onClick={() => toggleWishlist(item)}
-                    aria-label="Wishlist sneaker"
+                    aria-label="Wishlist item"
                   >
                     <Heart
                       size={15}
@@ -1048,7 +1428,7 @@ export default function ProductPage({ params }) {
                       <span className="sneaker-card-price">{formatPrice(item.price)}</span>
                       <div className="sneaker-card-rating">
                         <Star size={12} fill="#f59e0b" color="#f59e0b" />
-                        <span>{item.rating}</span>
+                        <span>{item.rating || 4.8}</span>
                       </div>
                     </div>
                   </div>
