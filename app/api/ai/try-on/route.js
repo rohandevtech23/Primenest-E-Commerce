@@ -3,7 +3,16 @@ import { processVirtualTryOn } from "@/lib/ai";
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { userImage, garmentImage, garmentName, category, productId, engine } = body;
+    const {
+      userImage,
+      garmentImage,
+      garmentName,
+      category,
+      productId,
+      engine,
+      openaiApiKey,
+      replicateToken,
+    } = body;
 
     if (!userImage) {
       return Response.json(
@@ -26,7 +35,9 @@ export async function POST(request) {
       garmentName: garmentName || "PrimeNest Apparel",
       category: category || "Apparel",
       productId,
-      engine: engine || "gemini-3",
+      engine: engine || "chatgpt",
+      openaiApiKey,
+      replicateToken,
     });
 
     return Response.json({

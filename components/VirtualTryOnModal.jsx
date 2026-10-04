@@ -56,6 +56,12 @@ const FOOTWEAR_DEMO_MODELS = [
 // Curated torso models with clean posture
 const APPAREL_DEMO_MODELS = [
   {
+    id: "verified-user",
+    label: "Streetwear Fit (Verified)",
+    gender: "male",
+    url: "/images/tryon/user_sample_original.png",
+  },
+  {
     id: "male-athletic",
     label: "Male (Athletic Fit)",
     gender: "male",
@@ -90,8 +96,12 @@ export default function VirtualTryOnModal({ isOpen, onClose, product, onAddToCar
 
   const demoModels = isFootwear ? FOOTWEAR_DEMO_MODELS : APPAREL_DEMO_MODELS;
 
-  // AI Model Selection
-  const [selectedEngine, setSelectedEngine] = useState("gemini-3"); // "gemini-3" | "idm-vton" | "primenest-pro"
+  // AI Model Selection - Default to ChatGPT for apparel (which delivers the SOTA result)
+  const [selectedEngine, setSelectedEngine] = useState(
+    isFootwear ? "gemini-3" : "chatgpt"
+  );
+  const [customOpenAiKey, setCustomOpenAiKey] = useState("");
+  const [showApiKeyDrawer, setShowApiKeyDrawer] = useState(false);
   const [isolateGarmentOnly, setIsolateGarmentOnly] = useState(!isFootwear); // isolate garment to eliminate ghost heads
 
   const [selectedUserImage, setSelectedUserImage] = useState(demoModels[0].url);
@@ -99,7 +109,7 @@ export default function VirtualTryOnModal({ isOpen, onClose, product, onAddToCar
   const [processing, setProcessing] = useState(false);
   const [processStep, setProcessStep] = useState("");
   const [generatedResult, setGeneratedResult] = useState(null);
-  const [viewMode, setViewMode] = useState("result"); // "result" or "split"
+  const [viewMode, setViewMode] = useState("result"); // "result" | "original" | "split"
   const [cleanCutoutUrl, setCleanCutoutUrl] = useState("");
 
   // Position, scale, and angle transform states
@@ -130,6 +140,7 @@ export default function VirtualTryOnModal({ isOpen, onClose, product, onAddToCar
       setCleanCutoutUrl("");
       setProcessing(false);
       setProcessStep("");
+      setSelectedEngine(isFootwear ? "gemini-3" : "chatgpt");
       setIsolateGarmentOnly(!isFootwear);
       setTransform({
         xPercent: 50,
@@ -377,13 +388,20 @@ export default function VirtualTryOnModal({ isOpen, onClose, product, onAddToCar
   );
 
   /**
-   * Run Try-On with Selected AI Model (Google Gemini 3.0 Vision / IDM-VTON / Clean Studio)
+   * Run Try-On with Selected AI Model (ChatGPT / Gemini 3.0 / IDM-VTON / Clean Studio)
    */
   const runVirtualTryOn = async () => {
     setProcessing(true);
 
     try {
-      if (selectedEngine === "gemini-3") {
+      if (selectedEngine === "chatgpt") {
+        setProcessStep("Connecting to ChatGPT / OpenAI Multi-Modal Inpainting Engine...");
+        await new Promise((r) => setTimeout(r, 600));
+        setProcessStep("Transferring apparel fabric & preserving identity landmarks...");
+        await new Promise((r) => setTimeout(r, 700));
+        setProcessStep("Rendering realistic drapery, shadow depth & skin contours...");
+        await new Promise((r) => setTimeout(r, 700));
+      } else if (selectedEngine === "gemini-3") {
         setProcessStep("Connecting to Google Gemini 3.0 Vision Neural Engine...");
         await new Promise((r) => setTimeout(r, 600));
         setProcessStep("Analyzing anatomical landmarks & posture elevation...");
@@ -413,6 +431,7 @@ export default function VirtualTryOnModal({ isOpen, onClose, product, onAddToCar
             category: product.category,
             productId: product.id,
             engine: selectedEngine,
+            openaiApiKey: customOpenAiKey || undefined,
           }),
         });
         if (res.ok) {
@@ -421,6 +440,26 @@ export default function VirtualTryOnModal({ isOpen, onClose, product, onAddToCar
         }
       } catch (apiErr) {
         console.warn("Try-on API fallback:", apiErr);
+      }
+
+      // If Generative AI returned a photorealistic synthesized image (ChatGPT / Diffusion)
+      if (aiResult?.generatedImageUrl) {
+        setViewMode("result");
+        setGeneratedResult({
+          image: aiResult.generatedImageUrl,
+          originalImage: selectedUserImage,
+          garmentName: product.name,
+          fitScore: aiResult.fitScore || 99.4,
+          engineModel: aiResult.model || "ChatGPT / OpenAI Neural Try-On (Catalog SOTA)",
+          notes:
+            aiResult.notes ||
+            "High-fidelity generative inpainting. Preserves facial identity, body posture, natural creases, dropped shoulders, and ambient lighting.",
+          styleTip:
+            aiResult.styleTip ||
+            "Pairs seamlessly with neutral cargo shorts or distressed light-wash denim.",
+          isGenerative: true,
+        });
+        return;
       }
 
       setProcessStep("Calibrating ambient lighting & blending contours...");
@@ -470,6 +509,7 @@ export default function VirtualTryOnModal({ isOpen, onClose, product, onAddToCar
 
       setGeneratedResult({
         image: compositeDataUrl || selectedUserImage,
+        originalImage: selectedUserImage,
         garmentName: product.name,
         fitScore: aiResult?.fitScore || 98,
         engineModel:
@@ -489,11 +529,13 @@ export default function VirtualTryOnModal({ isOpen, onClose, product, onAddToCar
           (isFootwear
             ? "Pairs effortlessly with cuffed relaxed denim, tapered cargo, or ankle-cut street trousers."
             : "Pairs exceptionally with tailored trousers or clean dark indigo denim."),
+        isGenerative: false,
       });
     } catch (err) {
       console.error("Virtual Try-On error:", err);
       setGeneratedResult({
         image: selectedUserImage,
+        originalImage: selectedUserImage,
         garmentName: product.name,
         fitScore: 95,
         engineModel: "PrimeNest Studio Engine",
@@ -501,6 +543,7 @@ export default function VirtualTryOnModal({ isOpen, onClose, product, onAddToCar
           ? "Footwear proportions aligned with natural standing ground elevation."
           : "Virtual styling fit mapped successfully.",
         styleTip: "Style with neutral tones to let the silhouette take focus.",
+        isGenerative: false,
       });
     } finally {
       setProcessing(false);
@@ -677,10 +720,65 @@ export default function VirtualTryOnModal({ isOpen, onClose, product, onAddToCar
 
             {/* AI Model Engine Selector */}
             <div className="vton-engine-selector-box">
-              <label className="vton-section-label">
-                <Cpu size={12} className="text-amber-500" /> SELECT AI TRY-ON MODEL
-              </label>
+              <div className="vton-engine-header-row">
+                <label className="vton-section-label">
+                  <Cpu size={12} className="text-amber-500" /> SELECT AI TRY-ON MODEL
+                </label>
+                <button
+                  type="button"
+                  className="vton-api-settings-link"
+                  onClick={() => setShowApiKeyDrawer(!showApiKeyDrawer)}
+                >
+                  ⚙️ {showApiKeyDrawer ? "Hide Key" : "Custom OpenAI Key"}
+                </button>
+              </div>
+
+              {showApiKeyDrawer && (
+                <div className="vton-api-drawer">
+                  <div className="vton-api-drawer-header">
+                    <span>OpenAI API Key (Optional for live generation):</span>
+                  </div>
+                  <div className="vton-api-input-wrap">
+                    <input
+                      type="password"
+                      placeholder="sk-proj-..."
+                      value={customOpenAiKey}
+                      onChange={(e) => setCustomOpenAiKey(e.target.value)}
+                      className="vton-api-input"
+                    />
+                    {customOpenAiKey && (
+                      <span className="text-xs text-emerald-500 font-semibold flex items-center">
+                        ✓ Active
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
+
               <div className="vton-engine-options">
+                {/* 1. ChatGPT / OpenAI SOTA Try-On */}
+                <button
+                  type="button"
+                  className={`vton-engine-card ${selectedEngine === "chatgpt" ? "active" : ""}`}
+                  onClick={() => setSelectedEngine("chatgpt")}
+                >
+                  <div className="vton-engine-radio">
+                    {selectedEngine === "chatgpt" && <span className="radio-dot" />}
+                  </div>
+                  <div className="vton-engine-meta">
+                    <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                      <span className="vton-engine-name">
+                        🤖 ChatGPT / OpenAI Neural Try-On (Catalog SOTA)
+                      </span>
+                      <span className="vton-recommended-badge">Verified</span>
+                    </div>
+                    <span className="vton-engine-sub">
+                      Multi-modal diffusion inpainting • Photorealistic fabric drape & zero ghost artifacts
+                    </span>
+                  </div>
+                </button>
+
+                {/* 2. Google Gemini 3.0 Vision */}
                 <button
                   type="button"
                   className={`vton-engine-card ${selectedEngine === "gemini-3" ? "active" : ""}`}
@@ -699,6 +797,7 @@ export default function VirtualTryOnModal({ isOpen, onClose, product, onAddToCar
                   </div>
                 </button>
 
+                {/* 3. IDM-VTON 2.0 */}
                 <button
                   type="button"
                   className={`vton-engine-card ${selectedEngine === "idm-vton" ? "active" : ""}`}
@@ -717,6 +816,7 @@ export default function VirtualTryOnModal({ isOpen, onClose, product, onAddToCar
                   </div>
                 </button>
 
+                {/* 4. PrimeNest Studio Clean-Fit */}
                 <button
                   type="button"
                   className={`vton-engine-card ${selectedEngine === "primenest-pro" ? "active" : ""}`}
@@ -864,7 +964,7 @@ export default function VirtualTryOnModal({ isOpen, onClose, product, onAddToCar
                     <span className="fit-indicator" />
                     <strong>{generatedResult.fitScore}% Fit Accuracy</strong>
                     <span className="vton-model-engine-badge">
-                      {generatedResult.engineModel || "Gemini 3.0"}
+                      {generatedResult.engineModel || "ChatGPT SOTA"}
                     </span>
                   </div>
 
@@ -874,21 +974,67 @@ export default function VirtualTryOnModal({ isOpen, onClose, product, onAddToCar
                       className={viewMode === "result" ? "active" : ""}
                       onClick={() => setViewMode("result")}
                     >
-                      {isFootwear ? "Fitted On-Foot" : "Fitted Look"}
+                      {isFootwear ? "Fitted On-Foot" : "Fitted Look ✨"}
+                    </button>
+                    <button
+                      type="button"
+                      className={viewMode === "original" ? "active" : ""}
+                      onClick={() => setViewMode("original")}
+                    >
+                      Original Photo
                     </button>
                     <button
                       type="button"
                       className={viewMode === "split" ? "active" : ""}
                       onClick={() => setViewMode("split")}
                     >
-                      Before / After
+                      Side-by-Side
                     </button>
                   </div>
                 </div>
 
                 {/* Main Interactive Stage */}
                 <div className="vton-display-frame">
-                  {viewMode === "result" ? (
+                  {viewMode === "split" ? (
+                    <div className="vton-split-display">
+                      <div className="vton-split-col">
+                        <span className="split-tag">Original Photo</span>
+                        <img src={selectedUserImage} alt="Original" />
+                      </div>
+                      <div className="vton-split-col">
+                        <span className="split-tag highlight">
+                          {isFootwear ? "On-Foot AI" : "AI Try-On"}
+                        </span>
+                        <img src={generatedResult.image} alt="After" />
+                      </div>
+                    </div>
+                  ) : viewMode === "original" ? (
+                    <div className="vton-generative-stage">
+                      <img
+                        src={selectedUserImage}
+                        alt="Original Photo"
+                        className="vton-generative-photo"
+                      />
+                      <span className="vton-watermark">✦ PrimeNest Original Photo</span>
+                    </div>
+                  ) : generatedResult?.isGenerative ? (
+                    /* SOTA Photorealistic Generative Result (ChatGPT / Diffusion) */
+                    <div className="vton-generative-stage">
+                      <div className="vton-generative-badge">
+                        <Sparkles size={12} />
+                        <span>SOTA Fashion Catalog Grade</span>
+                      </div>
+                      <img
+                        src={generatedResult.image}
+                        alt="Photorealistic AI Try-On"
+                        className="vton-generative-photo"
+                      />
+                      <span className="vton-watermark">
+                        ✦ PrimeNest {generatedResult.engineModel}
+                      </span>
+                    </div>
+                  ) : (
+                    /* 2D Canvas Interactive Viewport for Footwear / Clean-Fit */
                     <div className="vton-interactive-viewport">
                       {/* Drag Hint Banner */}
                       <div className="vton-drag-hint-banner">
@@ -958,24 +1104,11 @@ export default function VirtualTryOnModal({ isOpen, onClose, product, onAddToCar
                         </span>
                       </div>
                     </div>
-                  ) : (
-                    <div className="vton-split-display">
-                      <div className="vton-split-col">
-                        <span className="split-tag">Original</span>
-                        <img src={selectedUserImage} alt="Original" />
-                      </div>
-                      <div className="vton-split-col">
-                        <span className="split-tag highlight">
-                          {isFootwear ? "On-Foot AI" : "AI Try-On"}
-                        </span>
-                        <img src={generatedResult.image} alt="After" />
-                      </div>
-                    </div>
                   )}
                 </div>
 
-                {/* Precision Positioning & Sizing Controls */}
-                {viewMode === "result" && (
+                {/* Precision Positioning & Sizing Controls (for Footwear / Clean-Fit Canvas) */}
+                {viewMode === "result" && !generatedResult?.isGenerative && (
                   <div className="vton-adjust-panel">
                     <div className="vton-adjust-header">
                       <div className="vton-adjust-title">
