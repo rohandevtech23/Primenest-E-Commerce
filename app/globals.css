@@ -13740,6 +13740,125 @@ body * {
   margin-bottom: 8px;
 }
 
+/* AI Model Engine Selector Styles */
+.vton-engine-selector-box {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.vton-engine-options {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.vton-engine-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 8px 10px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.vton-engine-card:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+}
+
+.vton-engine-card.active {
+  border-color: #d4af37;
+  background: #fffdf5;
+  box-shadow: 0 0 0 1px rgba(212, 175, 55, 0.4);
+}
+
+.vton-engine-radio {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1.5px solid #94a3b8;
+  display: grid;
+  place-items: center;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.vton-engine-card.active .vton-engine-radio {
+  border-color: #d4af37;
+}
+
+.radio-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #d4af37;
+}
+
+.vton-engine-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.vton-engine-name {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.vton-engine-sub {
+  font-size: 10px;
+  color: #64748b;
+  line-height: 1.3;
+}
+
+/* Garment Isolation Toggle */
+.vton-isolation-toggle-row {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+
+.vton-checkbox-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.vton-checkbox-wrap input[type="checkbox"] {
+  accent-color: #d4af37;
+  width: 15px;
+  height: 15px;
+  cursor: pointer;
+}
+
+.vton-checkbox-wrap .checkbox-text {
+  font-size: 11px;
+  color: #334155;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.vton-model-engine-badge {
+  font-size: 10px;
+  font-weight: 700;
+  color: #b45309;
+  background: #fef3c7;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  padding: 2px 7px;
+  border-radius: 9999px;
+  margin-left: 6px;
+}
+
 .vton-upload-dropzone {
   border: 2px dashed #cbd5e1;
   border-radius: 12px;

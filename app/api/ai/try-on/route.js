@@ -3,7 +3,7 @@ import { processVirtualTryOn } from "@/lib/ai";
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { userImage, garmentImage, garmentName, category, productId } = body;
+    const { userImage, garmentImage, garmentName, category, productId, engine } = body;
 
     if (!userImage) {
       return Response.json(
@@ -19,13 +19,14 @@ export async function POST(request) {
       );
     }
 
-    // Execute Virtual Try-On pipeline
+    // Execute Virtual Try-On pipeline with selected AI model
     const tryOnResult = await processVirtualTryOn({
       userImage,
       garmentImage,
       garmentName: garmentName || "PrimeNest Apparel",
       category: category || "Apparel",
       productId,
+      engine: engine || "gemini-3",
     });
 
     return Response.json({
