@@ -450,16 +450,22 @@ export default function ProductPage({ params }) {
               </button>
             </div>
 
-            {/* AI VIRTUAL TRY-ON BUTTON */}
-            <button
-              type="button"
-              className="product-tryon-btn"
-              onClick={() => setIsTryOnOpen(true)}
-            >
-              <Sparkles size={16} className="tryon-sparkle" />
-              <span>Virtual Try-On</span>
-              <span className="tryon-ai-pill">✦ AI Neural Fit</span>
-            </button>
+            {/* AI VIRTUAL TRY-ON BUTTON (Available for Footwear & Apparel) */}
+            {product.category?.toLowerCase() !== "perfume" && (
+              <button
+                type="button"
+                className="product-tryon-btn"
+                onClick={() => setIsTryOnOpen(true)}
+              >
+                <Sparkles size={16} className="tryon-sparkle" />
+                <span>
+                  {product.category?.toLowerCase() === "footwear"
+                    ? "Virtual On-Foot Try-On"
+                    : "Virtual Try-On"}
+                </span>
+                <span className="tryon-ai-pill">✦ AI Neural Fit</span>
+              </button>
+            )}
 
             {/* PERKS / TRUST PILLS */}
             <div className="product-perks">
