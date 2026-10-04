@@ -41,7 +41,7 @@ import {
   ArrowDown,
 } from "lucide-react";
 import { toast } from "sonner";
-import VirtualTryOnModal from "@/components/VirtualTryOnModal";
+// import VirtualTryOnModal from "@/components/VirtualTryOnModal"; // Temporarily disabled: Virtual Try-On
 import AIReviewSummarizer from "@/components/AIReviewSummarizer";
 
 export default function ProductPage({ params }) {
@@ -59,7 +59,7 @@ export default function ProductPage({ params }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [addedRecently, setAddedRecently] = useState(false);
-  const [isTryOnOpen, setIsTryOnOpen] = useState(false);
+  // const [isTryOnOpen, setIsTryOnOpen] = useState(false); // Temporarily disabled: Virtual Try-On
   const [showSizeGuide, setShowSizeGuide] = useState(false);
   const [isFullscreenOpen, setIsFullscreenOpen] = useState(false);
   const [is360Active, setIs360Active] = useState(false);
@@ -1069,6 +1069,7 @@ export default function ProductPage({ params }) {
                   <span>360°</span>
                 </button>
 
+                {/* Virtual Try-On Pill (Temporarily disabled)
                 <button
                   type="button"
                   className="dark-stage-pill"
@@ -1078,6 +1079,7 @@ export default function ProductPage({ params }) {
                   <Camera size={13} />
                   <span>AR Try On</span>
                 </button>
+                */}
 
                 <button
                   type="button"
@@ -1466,7 +1468,7 @@ export default function ProductPage({ params }) {
             3. MIDDLE SECTION: 3 FEATURE CARDS SUITE (Side-by-Side)
            ========================================================================= */}
         <section className="dark-middle-suite-grid">
-          {/* Card 1: Virtual On-Foot Try On */}
+          {/* Card 1: Virtual On-Foot Try On (Temporarily disabled: Virtual Try-On)
           <div className="dark-feature-card dark-tryon-card">
             <div className="tryon-card-media">
               <img
@@ -1497,6 +1499,7 @@ export default function ProductPage({ params }) {
               <ChevronRight size={16} />
             </button>
           </div>
+          */}
 
           {/* Card 2: Complete the Look */}
           <div id="complete-the-look-section" className="dark-feature-card dark-outfit-card">
@@ -1724,15 +1727,15 @@ export default function ProductPage({ params }) {
       )}
 
       {/* =========================================================================
-          VIRTUAL TRY-ON MODAL
+          VIRTUAL TRY-ON MODAL (Temporarily disabled: Virtual Try-On)
          ========================================================================= */}
-      {isTryOnOpen && (
+      {/* {isTryOnOpen && (
         <VirtualTryOnModal
           isOpen={isTryOnOpen}
           onClose={() => setIsTryOnOpen(false)}
           product={product}
         />
-      )}
+      )} */}
 
       {/* =========================================================================
           SIZE GUIDE MODAL

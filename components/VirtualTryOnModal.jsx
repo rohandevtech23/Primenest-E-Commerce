@@ -1,5 +1,15 @@
 "use client";
 
+/**
+ * VIRTUAL TRY-ON MODAL (Temporarily Disabled)
+ * All code commented out as requested.
+ */
+
+export default function VirtualTryOnModal() {
+  return null;
+}
+
+/*
 import { useState, useRef, useEffect, useCallback } from "react";
 import {
   X,
@@ -1418,3 +1428,4 @@ export default function VirtualTryOnModal({ isOpen, onClose, product, onAddToCar
     </div>
   );
 }
+*/

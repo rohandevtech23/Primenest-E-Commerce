@@ -1,3 +1,8 @@
+/**
+ * Virtual Try-On API Route (Temporarily Disabled)
+ */
+
+/*
 import { processVirtualTryOn } from "@/lib/ai";
 
 export async function POST(request) {
@@ -51,4 +56,12 @@ export async function POST(request) {
       { status: 500 }
     );
   }
+}
+*/
+
+export async function POST() {
+  return Response.json(
+    { success: false, message: "Virtual Try-On is currently disabled." },
+    { status: 503 }
+  );
 }
