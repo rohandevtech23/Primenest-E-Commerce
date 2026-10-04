@@ -1,13 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Star, Sparkles, ThumbsUp, AlertCircle, CheckCircle, MessageSquarePlus, RefreshCw, Send, Check } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Star, Sparkles, ThumbsUp, AlertCircle, CheckCircle, MessageSquarePlus, RefreshCw, Send, Check, ChevronLeft, ChevronRight } from "lucide-react";
 
 export default function AIReviewSummarizer({ productId, productName }) {
   const [data, setData] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showReviewModal, setShowReviewModal] = useState(false);
+
+  // User and duplicate prevention state
+  const [currentUser, setCurrentUser] = useState(null);
+  const [hasAlreadyReviewed, setHasAlreadyReviewed] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  const reviewsTrackRef = useRef(null);
 
   // Review submission state
   const [authorName, setAuthorName] = useState("");
@@ -17,6 +23,27 @@ export default function AIReviewSummarizer({ productId, productName }) {
   const [fitFeedback, setFitFeedback] = useState("true_to_size");
   const [submitting, setSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+
+  // Load current logged-in user if available
+  useEffect(() => {
+    async function loadAuthUser() {
+      try {
+        const res = await fetch("/api/auth/me");
+        if (res.ok) {
+          const json = await res.json();
+          if (json?.user) {
+            setCurrentUser(json.user);
+            if (json.user.name) {
+              setAuthorName(json.user.name);
+            }
+          }
+        }
+      } catch (err) {
+        console.error("Auth check error in review summarizer:", err);
+      }
+    }
+    loadAuthUser();
+  }, []);
 
   const fetchSummaryAndReviews = async () => {
     try {
@@ -33,7 +60,26 @@ export default function AIReviewSummarizer({ productId, productName }) {
 
       if (revRes.ok) {
         const revJson = await revRes.json();
-        setReviews(revJson.reviews || []);
+        const revList = revJson.reviews || [];
+        setReviews(revList);
+
+        // Check if user has already reviewed (localStorage OR API flag OR matching author)
+        const localKey = `primenest_reviewed_p${productId}`;
+        const localCheck = typeof window !== "undefined" && localStorage.getItem(localKey);
+
+        if (localCheck === "true" || revJson.hasReviewed) {
+          setHasAlreadyReviewed(true);
+        } else if (currentUser?.name) {
+          const match = revList.some(
+            (r) => r.author_name?.trim().toLowerCase() === currentUser.name.trim().toLowerCase()
+          );
+          if (match) {
+            setHasAlreadyReviewed(true);
+            if (typeof window !== "undefined") {
+              localStorage.setItem(localKey, "true");
+            }
+          }
+        }
       }
     } catch (err) {
       console.error("Error loading review summary:", err);
@@ -46,14 +92,27 @@ export default function AIReviewSummarizer({ productId, productName }) {
     if (productId) {
       fetchSummaryAndReviews();
     }
-  }, [productId]);
+  }, [productId, currentUser?.name]);
+
+  const scrollReviews = (direction) => {
+    if (reviewsTrackRef.current) {
+      const scrollDistance = direction === "left" ? -360 : 360;
+      reviewsTrackRef.current.scrollBy({ left: scrollDistance, behavior: "smooth" });
+    }
+  };
 
   const handleSubmitReview = async (e) => {
     e.preventDefault();
     if (!authorName.trim() || !comment.trim()) return;
 
+    if (hasAlreadyReviewed) {
+      setSubmitError("You have already submitted a review for this product. Only 1 review per product is allowed.");
+      return;
+    }
+
     try {
       setSubmitting(true);
+      setSubmitError("");
       const res = await fetch("/api/reviews", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -67,19 +126,33 @@ export default function AIReviewSummarizer({ productId, productName }) {
         }),
       });
 
+      const resJson = await res.json();
+
       if (res.ok) {
         setSubmitSuccess(true);
+        setHasAlreadyReviewed(true);
+        if (typeof window !== "undefined") {
+          localStorage.setItem(`primenest_reviewed_p${productId}`, "true");
+        }
         setTimeout(() => {
           setSubmitSuccess(false);
           setShowReviewModal(false);
-          setAuthorName("");
           setTitle("");
           setComment("");
           fetchSummaryAndReviews();
         }, 1200);
+      } else {
+        setSubmitError(resJson.error || "Failed to submit review");
+        if (resJson.alreadyReviewed) {
+          setHasAlreadyReviewed(true);
+          if (typeof window !== "undefined") {
+            localStorage.setItem(`primenest_reviewed_p${productId}`, "true");
+          }
+        }
       }
     } catch (err) {
       console.error("Review submission error:", err);
+      setSubmitError("Network error. Please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -116,13 +189,27 @@ export default function AIReviewSummarizer({ productId, productName }) {
             </p>
           </div>
 
-          <button
-            type="button"
-            className="ai-write-btn"
-            onClick={() => setShowReviewModal(true)}
-          >
-            <MessageSquarePlus size={16} /> Write a Review
-          </button>
+          {hasAlreadyReviewed ? (
+            <button
+              type="button"
+              className="ai-write-btn reviewed"
+              disabled
+              title="You have already submitted a review for this product."
+            >
+              <Check size={16} /> Already Reviewed
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="ai-write-btn"
+              onClick={() => {
+                setSubmitError("");
+                setShowReviewModal(true);
+              }}
+            >
+              <MessageSquarePlus size={16} /> Write a Review
+            </button>
+          )}
         </div>
 
         {/* AI Highlights Glass Box */}
@@ -225,16 +312,40 @@ export default function AIReviewSummarizer({ productId, productName }) {
           </div>
         </div>
 
-        {/* Customer Reviews List */}
+        {/* Customer Reviews List - Clean Single Row with Scroll Bar */}
         <div className="customer-reviews-block">
-          <h3 className="customer-reviews-title">
-            Verified Customer Reviews ({reviews.length})
-          </h3>
+          <div className="customer-reviews-header-row">
+            <h3 className="customer-reviews-title">
+              Verified Customer Reviews ({reviews.length})
+            </h3>
+            {reviews.length > 3 && (
+              <div className="reviews-scroll-nav">
+                <button
+                  type="button"
+                  onClick={() => scrollReviews("left")}
+                  className="reviews-nav-btn"
+                  title="Previous reviews"
+                  aria-label="Previous reviews"
+                >
+                  <ChevronLeft size={16} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => scrollReviews("right")}
+                  className="reviews-nav-btn"
+                  title="Next reviews"
+                  aria-label="Next reviews"
+                >
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            )}
+          </div>
 
           {reviews.length === 0 ? (
             <p className="no-reviews-note">No individual reviews yet. Be the first to leave one!</p>
           ) : (
-            <div className="reviews-masonry">
+            <div className="reviews-scroll-track" ref={reviewsTrackRef}>
               {reviews.map((rev) => (
                 <div key={rev.id} className="review-item-card">
                   <div className="review-top-meta">
@@ -361,6 +472,13 @@ export default function AIReviewSummarizer({ productId, productName }) {
                   onChange={(e) => setComment(e.target.value)}
                 />
               </div>
+
+              {submitError && (
+                <div className="review-submit-error">
+                  <AlertCircle size={15} />
+                  <span>{submitError}</span>
+                </div>
+              )}
 
               <div className="form-actions">
                 <button
