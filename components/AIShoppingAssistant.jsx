@@ -80,6 +80,19 @@ export default function AIShoppingAssistant() {
     }
   }, [messages, isOpen, loading]);
 
+  useEffect(() => {
+    const handleCustomOpen = (e) => {
+      setIsOpen(true);
+      if (e.detail?.query) {
+        setTimeout(() => {
+          handleSend(e.detail.query);
+        }, 300);
+      }
+    };
+    window.addEventListener("open-ai-stylist", handleCustomOpen);
+    return () => window.removeEventListener("open-ai-stylist", handleCustomOpen);
+  }, [messages, loading]);
+
   const handleSend = async (textToSend) => {
     const query = typeof textToSend === "string" ? textToSend : input;
     if (!query || !query.trim() || loading) return;
