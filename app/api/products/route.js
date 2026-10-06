@@ -14,7 +14,14 @@ export async function GET() {
         p.subcategory,
         c.name AS category,
         c.slug AS category_slug,
-        pi.image_url AS image
+        pi.image_url AS image,
+        (
+          SELECT image_url
+          FROM product_images
+          WHERE product_id = p.id AND is_primary = FALSE
+          ORDER BY id ASC
+          LIMIT 1
+        ) AS hover_image
       FROM products p
       JOIN categories c
         ON p.category_id = c.id

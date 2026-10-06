@@ -31,6 +31,7 @@ import {
   Edit3,
   Info,
   ChevronDown,
+  Trash2,
 } from "lucide-react";
 
 // Curated available discount coupons
@@ -76,7 +77,7 @@ const PIN_CODE_MAP = {
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { cart, cartTotal, clearCart, isCartLoaded } = useCart();
+  const { cart, cartTotal, clearCart, isCartLoaded, removeFromCart } = useCart();
 
   const [authChecking, setAuthChecking] = useState(true);
   const [currentUser, setCurrentUser] = useState(null);
@@ -128,6 +129,28 @@ export default function CheckoutPage() {
   const [isDonationActive, setIsDonationActive] = useState(false);
   const [donationAmount, setDonationAmount] = useState(20);
   const [showDonationModal, setShowDonationModal] = useState(false);
+
+  // Remove Item Confirmation Modal State (Cancel / OK)
+  const [itemPendingRemoval, setItemPendingRemoval] = useState(null);
+
+  const handleConfirmItemRemoval = () => {
+    if (!itemPendingRemoval) return;
+    const targetItem = itemPendingRemoval;
+    const itemKey =
+      targetItem.cartItemId ||
+      (targetItem.variantLabel
+        ? `${targetItem.id}-${targetItem.variantLabel}`
+        : targetItem.id);
+
+    removeFromCart(itemKey);
+    removeFromCart(targetItem.id);
+    setItemPendingRemoval(null);
+
+    toast.success("Item removed from order", {
+      description: `${targetItem.name} has been removed from your shopping bag.`,
+      icon: "🗑️",
+    });
+  };
 
   // Checkout submission & Payment modal state
   const [loading, setLoading] = useState(false);
@@ -1284,8 +1307,14 @@ export default function CheckoutPage() {
                     const itemPrice = Number(
                       String(item.price).replace(/[₹,]/g, "")
                     );
+                    const itemKey =
+                      item.cartItemId ||
+                      (item.variantLabel
+                        ? `${item.id}-${item.variantLabel}`
+                        : item.id);
+
                     return (
-                      <div className="checkout-item-luxury" key={item.id}>
+                      <div className="checkout-item-luxury" key={itemKey || item.id}>
                         <div className="checkout-item-thumb">
                           {item.image ? (
                             <img src={item.image} alt={item.name} />
@@ -1296,12 +1325,35 @@ export default function CheckoutPage() {
                         </div>
 
                         <div className="checkout-item-meta">
-                          <span className="item-category-tag">{item.category}</span>
-                          <h4 className="item-title">{item.name}</h4>
+                          <div className="item-meta-top">
+                            <span className="item-category-tag">{item.category}</span>
+                            <button
+                              type="button"
+                              className="checkout-item-remove-btn"
+                              onClick={() => setItemPendingRemoval(item)}
+                              title={`Remove ${item.name} from bag`}
+                              aria-label={`Remove ${item.name}`}
+                            >
+                              <X size={12} />
+                              <span>Remove</span>
+                            </button>
+                          </div>
+
+                          <h4 className="item-title" title={item.name}>{item.name}</h4>
+
+                          {item.variantLabel && (
+                            <span className="item-size-badge">Size: {item.variantLabel}</span>
+                          )}
+
                           <div className="item-price-row">
                             <span className="item-price-val">
                               {formatPrice(itemPrice * Number(item.quantity))}
                             </span>
+                            {Number(item.quantity) > 1 && (
+                              <span className="item-unit-calc">
+                                ({formatPrice(itemPrice)} × {item.quantity})
+                              </span>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -1707,6 +1759,110 @@ export default function CheckoutPage() {
                 }}
               >
                 Contribute {formatPrice(donationAmount)}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* =======================================================
+          REMOVE ITEM CONFIRMATION MODAL (Cancel / OK)
+      ======================================================= */}
+      {itemPendingRemoval && (
+        <div
+          className="myntra-modal-backdrop"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setItemPendingRemoval(null);
+          }}
+          style={{ zIndex: 99999 }}
+        >
+          <div
+            className="checkout-remove-modal-card"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="remove-item-dialog-title"
+          >
+            <div className="checkout-remove-modal-header">
+              <div className="checkout-remove-header-left">
+                <div className="checkout-remove-icon-wrap">
+                  <Trash2 size={20} />
+                </div>
+                <div>
+                  <h3 id="remove-item-dialog-title">Remove Item from Order?</h3>
+                  <p className="checkout-remove-subtitle">
+                    Are you sure you want to remove this item from your bag?
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                className="checkout-remove-close-btn"
+                onClick={() => setItemPendingRemoval(null)}
+                aria-label="Close dialog"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Item Preview */}
+            <div className="checkout-remove-item-preview">
+              <div className="checkout-remove-item-thumb">
+                {itemPendingRemoval.image ? (
+                  <img
+                    src={itemPendingRemoval.image}
+                    alt={itemPendingRemoval.name}
+                  />
+                ) : (
+                  <span>PN</span>
+                )}
+              </div>
+              <div className="checkout-remove-item-info">
+                {itemPendingRemoval.category && (
+                  <span className="checkout-remove-category">
+                    {itemPendingRemoval.category}
+                  </span>
+                )}
+                <h4 className="checkout-remove-name">{itemPendingRemoval.name}</h4>
+                <div className="checkout-remove-pricing">
+                  <span className="checkout-remove-price">
+                    {formatPrice(
+                      Number(String(itemPendingRemoval.price).replace(/[₹,]/g, "")) *
+                        Number(itemPendingRemoval.quantity || 1)
+                    )}
+                  </span>
+                  {Number(itemPendingRemoval.quantity) > 1 && (
+                    <span className="checkout-remove-qty">
+                      Qty: {itemPendingRemoval.quantity}
+                    </span>
+                  )}
+                  {itemPendingRemoval.variantLabel && (
+                    <span className="checkout-remove-size">
+                      Size: {itemPendingRemoval.variantLabel}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <p className="checkout-remove-notice">
+              This product will be removed from your order summary and the total payable amount will be recalculated.
+            </p>
+
+            {/* Cancel & OK Action Buttons */}
+            <div className="checkout-remove-modal-actions">
+              <button
+                type="button"
+                className="checkout-remove-btn-cancel"
+                onClick={() => setItemPendingRemoval(null)}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="checkout-remove-btn-ok"
+                onClick={handleConfirmItemRemoval}
+              >
+                OK
               </button>
             </div>
           </div>

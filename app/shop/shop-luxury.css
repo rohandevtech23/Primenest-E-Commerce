@@ -1,0 +1,1330 @@
+/* =========================================================================
+   PRIMENEST LUXURY SHOP & CATEGORY SHOWCASE STYLES
+   Ultra-high-end typography, glassmorphism, micro-animations & responsive layout
+   ========================================================================= */
+
+/* --- ROOT & KEYFRAMES --- */
+@keyframes ambientPulse {
+  0%, 100% {
+    transform: scale(1) translate(0, 0);
+    opacity: 0.45;
+  }
+  50% {
+    transform: scale(1.12) translate(-10px, 8px);
+    opacity: 0.75;
+  }
+}
+
+@keyframes heroShimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes subcatSlideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    max-height: 600px;
+    transform: translateY(0);
+  }
+}
+
+@keyframes heartPop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+
+@keyframes pulseGold {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(197, 160, 89, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 5px rgba(197, 160, 89, 0);
+  }
+}
+
+/* =========================================================================
+   1. LUXURY EDITORIAL SHOWCASE HEADER
+   ========================================================================= */
+.shop-luxury-header {
+  position: relative;
+  background: radial-gradient(circle at 50% -20%, rgba(212, 175, 55, 0.12) 0%, rgba(248, 246, 240, 0.5) 45%, #ffffff 85%),
+              linear-gradient(180deg, #faf8f5 0%, #ffffff 100%);
+  border-bottom: 1px solid rgba(228, 222, 212, 0.75);
+  padding: 45px 4% 38px;
+  text-align: center;
+  overflow: hidden;
+}
+
+.shop-header-ambient-orb {
+  position: absolute;
+  top: -80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 550px;
+  height: 250px;
+  background: radial-gradient(ellipse at center, rgba(197, 160, 89, 0.18), transparent 70%);
+  filter: blur(40px);
+  pointer-events: none;
+  animation: ambientPulse 8s ease-in-out infinite;
+}
+
+.shop-eyebrow-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(197, 160, 89, 0.35);
+  border-radius: 9999px;
+  box-shadow: 0 4px 14px -3px rgba(197, 160, 89, 0.18);
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #8c713f;
+  margin-bottom: 16px;
+  backdrop-filter: blur(8px);
+  animation: fadeInUp 0.45s ease both;
+}
+
+.shop-eyebrow-sparkle {
+  color: #d97706;
+  font-size: 12px;
+}
+
+.shop-luxury-header h1 {
+  font-family: var(--font-playfair), "Playfair Display", serif;
+  font-size: clamp(36px, 5.5vw, 64px);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  color: #171513;
+  margin: 0 0 12px;
+  line-height: 1.15;
+  animation: fadeInUp 0.55s ease both;
+}
+
+.shop-title-accent {
+  background: linear-gradient(135deg, #171513 30%, #a1844e 85%, #d97706 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.shop-luxury-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin: 12px auto 16px;
+  max-width: 220px;
+}
+
+.shop-luxury-divider-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #c5a059, transparent);
+}
+
+.shop-luxury-divider-diamond {
+  color: #c5a059;
+  font-size: 11px;
+  transform: rotate(45deg);
+  display: inline-block;
+}
+
+.shop-luxury-intro {
+  max-width: 580px;
+  margin: 0 auto 20px;
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif;
+  font-size: 14.5px;
+  line-height: 1.7;
+  color: #635d55;
+  animation: fadeInUp 0.65s ease both;
+}
+
+/* Category Feature Tag Pills */
+.shop-header-feature-pills {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+  animation: fadeInUp 0.75s ease both;
+}
+
+.shop-feature-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(220, 214, 204, 0.6);
+  border-radius: 9999px;
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #4a453e;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+  transition: all 0.2s ease;
+}
+
+.shop-feature-pill:hover {
+  background: #ffffff;
+  border-color: #c5a059;
+  transform: translateY(-1px);
+  color: #171513;
+}
+
+/* =========================================================================
+   2. FLOATING GLASS CONTROLS DOCK
+   ========================================================================= */
+.shop-controls-dock {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin: 28px 0 10px;
+  padding: 14px 22px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(225, 219, 209, 0.85);
+  border-radius: 20px;
+  box-shadow: 0 12px 32px -10px rgba(28, 25, 23, 0.06), 0 2px 8px rgba(0, 0, 0, 0.02);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  position: relative;
+  z-index: 10;
+}
+
+/* Search input container */
+.shop-search-modern {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 260px;
+  max-width: 440px;
+  background: #f7f5f0;
+  border: 1px solid #e5ded3;
+  border-radius: 9999px;
+  padding: 8px 16px;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.shop-search-modern:focus-within {
+  background: #ffffff;
+  border-color: #c5a059;
+  box-shadow: 0 0 0 3px rgba(197, 160, 89, 0.18), 0 4px 12px rgba(197, 160, 89, 0.08);
+}
+
+.shop-search-icon {
+  color: #a1844e;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.shop-search-modern:focus-within .shop-search-icon {
+  transform: scale(1.1);
+  color: #78350f;
+}
+
+.shop-search-modern input {
+  width: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #171513;
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.shop-search-modern input::placeholder {
+  color: #9c9589;
+  font-weight: 400;
+}
+
+.shop-search-clear-btn {
+  background: transparent;
+  border: none;
+  color: #9c9589;
+  cursor: pointer;
+  padding: 2px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.shop-search-clear-btn:hover {
+  color: #171513;
+  background: rgba(0, 0, 0, 0.06);
+  transform: rotate(90deg);
+}
+
+/* Quick Price Range Filter Pills inside Dock */
+.shop-price-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.shop-price-pill {
+  padding: 6px 12px;
+  border-radius: 9999px;
+  border: 1px solid #ded7ca;
+  background: transparent;
+  color: #555047;
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif;
+  font-size: 11.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+
+.shop-price-pill:hover {
+  background: #f4ede1;
+  color: #171513;
+  border-color: #c5a059;
+}
+
+.shop-price-pill.active {
+  background: #171513;
+  color: #ffffff;
+  border-color: #171513;
+  box-shadow: 0 4px 12px rgba(23, 21, 19, 0.15);
+}
+
+/* Controls Right Group (Sort + Grid toggles) */
+.shop-controls-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.shop-sort-modern {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f7f5f0;
+  border: 1px solid #e5ded3;
+  border-radius: 9999px;
+  padding: 6px 14px;
+  transition: all 0.2s ease;
+}
+
+.shop-sort-modern:hover {
+  border-color: #c5a059;
+  background: #ffffff;
+}
+
+.shop-sort-icon {
+  color: #a1844e;
+  flex-shrink: 0;
+}
+
+.shop-sort-modern label {
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #8c713f;
+  white-space: nowrap;
+}
+
+.shop-sort-modern select {
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #171513;
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Grid Density Toggle */
+.shop-grid-toggle {
+  display: flex;
+  align-items: center;
+  background: #f7f5f0;
+  border: 1px solid #e5ded3;
+  border-radius: 9999px;
+  padding: 3px;
+  gap: 2px;
+}
+
+.shop-grid-toggle-btn {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: #888;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.shop-grid-toggle-btn.active {
+  background: #171513;
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* =========================================================================
+   3. BESPOKE LUXURY CATEGORY SIDEBAR & CATALOG LAYOUT
+   ========================================================================= */
+.shop-catalog {
+  display: grid;
+  grid-template-columns: 285px minmax(0, 1fr);
+  gap: 38px;
+  padding-top: 32px;
+  align-items: start;
+}
+
+.shop-sidebar {
+  width: 100%;
+  min-width: 0;
+}
+
+.shop-sidebar-card {
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid #ebe4d8;
+  border-radius: 24px;
+  box-shadow: 0 10px 32px -8px rgba(28, 25, 23, 0.05);
+  padding: 22px 18px;
+  position: sticky;
+  top: 96px;
+  transition: box-shadow 0.3s ease;
+}
+
+.shop-sidebar-card:hover {
+  box-shadow: 0 16px 40px -10px rgba(28, 25, 23, 0.09);
+}
+
+.shop-sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0 4px 14px;
+  border-bottom: 1px solid #f0ebe2;
+  margin-bottom: 14px;
+}
+
+.shop-sidebar-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.shop-sidebar-title-icon {
+  color: #c5a059;
+  flex-shrink: 0;
+}
+
+.shop-sidebar-title {
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #171513;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.shop-sidebar-total-badge {
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif;
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 3px 9px;
+  background: #f7f4ee;
+  border: 1px solid #e7ded0;
+  color: #8c713f;
+  border-radius: 9999px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Category List Stack */
+.shop-category-list-modern {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.shop-category-group-modern {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Category Item Button */
+.shop-category-btn-modern {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  background: transparent;
+  color: #4a453e;
+  text-align: left;
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+.shop-category-btn-modern:hover {
+  background: #faf7f2;
+  border-color: #ede5d8;
+  color: #171513;
+  transform: translateX(4px);
+}
+
+/* Active Category Item Button */
+.shop-category-btn-modern.active {
+  background: linear-gradient(135deg, #181512 0%, #29241f 100%);
+  color: #ffffff;
+  border-color: #181512;
+  font-weight: 600;
+  box-shadow: 0 6px 18px -4px rgba(24, 21, 18, 0.25);
+  transform: translateX(2px);
+}
+
+.shop-category-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.shop-category-icon-wrap {
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  background: #f7f4ee;
+  border: 1px solid #ebe4d8;
+  display: grid;
+  place-items: center;
+  color: #a1844e;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.shop-category-btn-modern:hover .shop-category-icon-wrap {
+  background: #ffffff;
+  color: #78350f;
+  transform: scale(1.08);
+}
+
+.shop-category-btn-modern.active .shop-category-icon-wrap {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(197, 160, 89, 0.4);
+  color: #f3e3be;
+}
+
+.shop-category-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.shop-category-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.shop-category-count-pill {
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 9999px;
+  background: #f3ede2;
+  color: #7d6333;
+  font-variant-numeric: tabular-nums;
+  transition: all 0.2s ease;
+}
+
+.shop-category-btn-modern:hover .shop-category-count-pill {
+  background: #eadecb;
+  color: #55401b;
+}
+
+.shop-category-btn-modern.active .shop-category-count-pill {
+  background: #c5a059;
+  color: #ffffff;
+}
+
+.shop-category-chevron-modern {
+  color: #a8a095;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.2s;
+}
+
+.shop-category-btn-modern:hover .shop-category-chevron-modern {
+  color: #171513;
+}
+
+.shop-category-btn-modern.active .shop-category-chevron-modern {
+  color: #f3e3be;
+}
+
+.shop-category-chevron-modern.rotated {
+  transform: rotate(180deg);
+}
+
+/* =========================================================================
+   Subcategory Accordion Box
+   ========================================================================= */
+.shop-subcategory-box {
+  margin: 4px 0 10px 16px;
+  padding: 6px 4px 6px 12px;
+  border-left: 2px solid #c5a059;
+  background: linear-gradient(180deg, #fdfbf7 0%, #f9f6ef 100%);
+  border-radius: 0 14px 14px 0;
+  animation: subcatSlideDown 0.26s cubic-bezier(0.16, 1, 0.3, 1) both;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.shop-sub-item-modern {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 7px 10px;
+  border: none;
+  background: transparent;
+  color: #5a544b;
+  text-align: left;
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif;
+  font-size: 11.5px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.18s ease;
+  width: 100%;
+}
+
+.shop-sub-item-modern:hover {
+  background: #efe8dc;
+  color: #171513;
+  transform: translateX(3px);
+}
+
+.shop-sub-item-modern.active {
+  background: #171513;
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.shop-sub-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.shop-sub-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #c5a059;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.shop-sub-item-modern.active .shop-sub-dot {
+  background: #fbbf24;
+  box-shadow: 0 0 8px #fbbf24;
+}
+
+.shop-sub-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.shop-sub-badge {
+  font-size: 10px;
+  font-weight: 600;
+  color: #8c713f;
+  margin-left: 6px;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+.shop-sub-item-modern.active .shop-sub-badge {
+  color: #f3e3be;
+}
+
+/* Sidebar Assurance Badge */
+.shop-sidebar-guarantee-card {
+  margin-top: 18px;
+  padding: 14px 12px;
+  background: linear-gradient(135deg, #fdfbf7 0%, #f6f1e6 100%);
+  border: 1px solid #ebe2d3;
+  border-radius: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.shop-guarantee-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: #61584c;
+}
+
+.shop-guarantee-icon {
+  color: #a1844e;
+  flex-shrink: 0;
+}
+
+/* =========================================================================
+   4. ACTIVE FILTER CHIPS BAR
+   ========================================================================= */
+.shop-active-filters-modern {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 24px;
+  padding: 12px 18px;
+  background: #ffffff;
+  border: 1px solid #ebe4d8;
+  border-radius: 14px;
+  box-shadow: 0 4px 16px -4px rgba(28, 25, 23, 0.03);
+}
+
+.shop-active-filters-label {
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8c713f;
+  margin-right: 4px;
+}
+
+.shop-filter-chip-modern {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  background: #f7f4ee;
+  border: 1px solid #ded6c8;
+  border-radius: 9999px;
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #171513;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.shop-filter-chip-modern:hover {
+  background: #171513;
+  color: #ffffff;
+  border-color: #171513;
+  transform: translateY(-1px);
+}
+
+.shop-filter-chip-modern:hover svg {
+  transform: rotate(90deg);
+}
+
+.shop-clear-all-modern {
+  background: transparent;
+  border: none;
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #b45309;
+  cursor: pointer;
+  padding: 4px 8px;
+  margin-left: auto;
+  transition: color 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.shop-clear-all-modern:hover {
+  color: #78350f;
+  text-decoration: underline;
+}
+
+/* =========================================================================
+   5. RESULTS SUMMARY HEADING
+   ========================================================================= */
+.shop-results-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #f0ebe2;
+}
+
+.shop-results-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.shop-results-category-title {
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #171513;
+  margin: 0;
+}
+
+.shop-results-badge-count {
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: #8c713f;
+  background: #f7f4ee;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  border: 1px solid #e7ded0;
+}
+
+/* =========================================================================
+   6. HIGH-END PRODUCT CARDS WITH MICRO-ANIMATIONS
+   ========================================================================= */
+.shop-product-grid-modern {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 28px 18px;
+}
+
+.shop-product-grid-modern.grid-3-col {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.shop-card-luxury {
+  display: flex;
+  flex-direction: column;
+  border-radius: 20px;
+  background: #ffffff;
+  border: 1px solid #ebe5dc;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 16px -4px rgba(28, 25, 23, 0.03);
+  position: relative;
+}
+
+.shop-card-luxury:hover {
+  transform: translateY(-7px);
+  border-color: #dbcbb5;
+  box-shadow: 0 20px 40px -14px rgba(28, 25, 23, 0.11), 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+/* Card Image Stage */
+.shop-card-img-wrap {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  background: #f6f3ee;
+  overflow: hidden;
+}
+
+.shop-card-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.shop-card-luxury:hover .shop-card-img-wrap img {
+  transform: scale(1.07);
+}
+
+/* Top-Left Category Tag */
+.shop-card-tag {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 4px 10px;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(220, 214, 204, 0.8);
+  border-radius: 9999px;
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #78350f;
+  backdrop-filter: blur(8px);
+  z-index: 2;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Top-Right Floating Wishlist Button */
+.shop-card-wish-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid rgba(220, 214, 204, 0.8);
+  background: rgba(255, 255, 255, 0.88);
+  display: grid;
+  place-items: center;
+  color: #777;
+  cursor: pointer;
+  z-index: 3;
+  backdrop-filter: blur(8px);
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.shop-card-wish-btn:hover {
+  transform: scale(1.15);
+  background: #ffffff;
+  color: #e11d48;
+  border-color: #fecdd3;
+}
+
+.shop-card-wish-btn.wishlisted {
+  color: #e11d48;
+  border-color: #fda4af;
+  background: #fff1f2;
+  animation: heartPop 0.3s ease;
+}
+
+/* Hover Quick View Pill Button */
+.shop-card-hover-action {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%) translateY(16px);
+  opacity: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  background: rgba(23, 21, 19, 0.92);
+  color: #ffffff;
+  border-radius: 9999px;
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  backdrop-filter: blur(8px);
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 2;
+  white-space: nowrap;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+}
+
+.shop-card-luxury:hover .shop-card-hover-action {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Card Content Info */
+.shop-card-body {
+  padding: 14px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #ffffff;
+}
+
+.shop-card-info-link {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.shop-card-eyebrow-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.shop-card-category-text {
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #8c713f;
+}
+
+.shop-card-rating {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: #4b5563;
+}
+
+.shop-card-star {
+  color: #f59e0b;
+}
+
+.shop-card-title {
+  margin: 0;
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #171513;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.2s ease;
+}
+
+.shop-card-luxury:hover .shop-card-title {
+  color: #a1844e;
+}
+
+.shop-card-price-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-top: 4px;
+}
+
+.shop-card-price {
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #171513;
+}
+
+.shop-card-free-tag {
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  color: #059669;
+  background: #ecfdf5;
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid #d1fae5;
+}
+
+/* Luxury Add to Bag Button on Cards (Every Category) */
+.shop-card-add-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  padding: 9px 14px;
+  background: #fbf9f5;
+  color: #171513;
+  border: 1px solid #e2dacd;
+  border-radius: 10px;
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.shop-card-add-btn:hover {
+  background: #171513;
+  color: #ffffff;
+  border-color: #171513;
+  box-shadow: 0 6px 16px -2px rgba(23, 21, 19, 0.22);
+  transform: translateY(-1px);
+}
+
+.shop-card-add-btn.is-added {
+  background: #059669;
+  color: #ffffff;
+  border-color: #059669;
+  box-shadow: 0 4px 14px rgba(5, 150, 105, 0.25);
+}
+
+.shop-card-btn-icon {
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.shop-card-add-btn:hover .shop-card-btn-icon {
+  transform: scale(1.1);
+}
+
+/* =========================================================================
+   7. RESPONSIVE BREAKPOINTS
+   ========================================================================= */
+@media (max-width: 1280px) {
+  .shop-catalog {
+    grid-template-columns: 260px minmax(0, 1fr);
+    gap: 28px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .shop-product-grid-modern {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 992px) {
+  .shop-catalog {
+    grid-template-columns: 1fr;
+    gap: 25px;
+  }
+
+  .shop-sidebar-card {
+    position: static;
+  }
+
+  .shop-product-grid-modern {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .shop-luxury-header {
+    padding: 32px 16px 24px;
+  }
+
+  .shop-controls-dock {
+    padding: 12px 14px;
+  }
+
+  .shop-search-modern {
+    min-width: 100%;
+  }
+
+  .shop-controls-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .shop-product-grid-modern {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px 12px;
+  }
+
+  .shop-card-body {
+    padding: 10px 12px 12px;
+  }
+
+  .shop-card-title {
+    font-size: 12.5px;
+  }
+
+  .shop-card-price {
+    font-size: 13.5px;
+  }
+}
+
+/* =========================================================================
+   8. BESPOKE LUXURY CATALOG PAGINATION
+   ========================================================================= */
+.shop-pagination-wrap {
+  margin-top: 52px;
+  padding-top: 32px;
+  border-top: 1px solid #ebe4d8;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.shop-pagination-info {
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #78716c;
+}
+
+.shop-pagination-info strong {
+  color: #171513;
+  font-weight: 700;
+}
+
+.shop-pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.shop-pagination-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: 12px;
+  border: 1px solid #e5ded3;
+  background: #ffffff;
+  color: #4a453e;
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+
+.shop-pagination-btn:hover:not(:disabled) {
+  border-color: #171513;
+  color: #171513;
+  background: #faf7f2;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.shop-pagination-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  border-color: #eeeae4;
+  background: #fdfbf7;
+  color: #a8a095;
+}
+
+.shop-pagination-pages {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0 4px;
+}
+
+.shop-pagination-number {
+  min-width: 38px;
+  height: 38px;
+  padding: 0 8px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #4a453e;
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.shop-pagination-number:hover {
+  background: #f3ece1;
+  color: #171513;
+}
+
+.shop-pagination-number.active {
+  background: #171513;
+  color: #ffffff;
+  border-color: #171513;
+  font-weight: 700;
+  box-shadow: 0 4px 14px -2px rgba(23, 21, 19, 0.3);
+  transform: scale(1.05);
+}
+
+.shop-pagination-ellipsis {
+  min-width: 24px;
+  text-align: center;
+  color: #a8a095;
+  font-size: 14px;
+  user-select: none;
+}
+
+.shop-pagination-per-page {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif;
+  font-size: 12px;
+  color: #78716c;
+}
+
+.shop-pagination-select {
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid #ded6c8;
+  background: #ffffff;
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #171513;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.shop-pagination-select:focus {
+  border-color: #171513;
+}
+
+@media (max-width: 768px) {
+  .shop-pagination-wrap {
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+  }
+  .shop-pagination-controls {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+

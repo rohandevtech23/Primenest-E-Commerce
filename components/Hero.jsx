@@ -21,20 +21,6 @@ const SLIDES = [
   },
   {
     id: 2,
-    theme: "Footwear & Sneakers",
-    eyebrow: "STEP INTO GREATNESS",
-    title: "Premium Shoes Collection",
-    subtitle: "Authentic Branded Footwear",
-    description: "Discover authentic branded shoes for every step of your journey.",
-    badge: "Footwear",
-    image: "/images/shop-banner.png",
-    fallbackImage: "/images/shop-banner.png",
-    link: "/shop?category=footwear",
-    category: "Footwear",
-    accentColor: "#d97706",
-  },
-  {
-    id: 3,
     theme: "Women's Collection",
     eyebrow: "LIVE BEAUTIFULLY",
     title: "Women's Fashion Collection",
@@ -48,7 +34,7 @@ const SLIDES = [
     accentColor: "#c2410c",
   },
   {
-    id: 4,
+    id: 3,
     theme: "Men's Collection",
     eyebrow: "MODERN MENSWEAR",
     title: "Style for Every Journey",
@@ -62,7 +48,7 @@ const SLIDES = [
     accentColor: "#9a3412",
   },
   {
-    id: 5,
+    id: 4,
     theme: "Accessories Collection",
     eyebrow: "COMPLETE YOUR LOOK",
     title: "Accessories Collection",
@@ -76,7 +62,7 @@ const SLIDES = [
     accentColor: "#d97706",
   },
   {
-    id: 6,
+    id: 5,
     theme: "Season Sale",
     eyebrow: "SEASON SALE",
     title: "Up To 50% Off",

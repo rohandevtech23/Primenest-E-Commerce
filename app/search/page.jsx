@@ -2,9 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Search, X, Sparkles, SlidersHorizontal, ArrowRight, RefreshCw } from "lucide-react";
+import { Search, X, Sparkles, SlidersHorizontal, ArrowRight, RefreshCw, ChevronLeft, ChevronRight, ShoppingBag, Check } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { useCart } from "@/context/CartContext";
 
 const AI_SAMPLE_PROMPTS = [
   "Minimalist linen outfits for summer",
@@ -21,6 +22,34 @@ export default function SearchPage() {
   const [loading, setLoading] = useState(true);
   const [aiSearching, setAiSearching] = useState(false);
   const [error, setError] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 8;
+  const { addToCart } = useCart();
+  const [addedItemIds, setAddedItemIds] = useState({});
+
+  const handleQuickAddToCart = (e, product) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const defaultSize = product.sizes
+      ? (Array.isArray(product.sizes)
+          ? product.sizes[0]
+          : String(product.sizes).split(",")[0].trim())
+      : (product.variantLabel || null);
+
+    addToCart(
+      {
+        ...product,
+        variantLabel: defaultSize,
+      },
+      1
+    );
+
+    setAddedItemIds((prev) => ({ ...prev, [product.id]: true }));
+    setTimeout(() => {
+      setAddedItemIds((prev) => ({ ...prev, [product.id]: false }));
+    }, 1800);
+  };
 
   // Initialize query from URL parameter
   useEffect(() => {
@@ -92,6 +121,43 @@ export default function SearchPage() {
   }, [query, products]);
 
   const activeResults = searchMode === "ai" ? aiResults : keywordFiltered;
+
+  // Reset pagination when query or search mode changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [query, searchMode]);
+
+  const totalResults = activeResults.length;
+  const totalPages = Math.max(1, Math.ceil(totalResults / itemsPerPage));
+  const safeCurrentPage = Math.min(Math.max(currentPage, 1), totalPages);
+
+  const startIndex = (safeCurrentPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, totalResults);
+  const paginatedResults = useMemo(() => {
+    return activeResults.slice(startIndex, endIndex);
+  }, [activeResults, startIndex, endIndex]);
+
+  const handlePageChange = (newPage) => {
+    if (newPage < 1 || newPage > totalPages || newPage === safeCurrentPage) return;
+    setCurrentPage(newPage);
+    const targetEl = document.querySelector(".search-results");
+    if (targetEl) {
+      targetEl.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  const getPageNumbers = () => {
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    if (safeCurrentPage <= 4) {
+      return [1, 2, 3, 4, 5, "...", totalPages];
+    }
+    if (safeCurrentPage >= totalPages - 3) {
+      return [1, "...", totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+    }
+    return [1, "...", safeCurrentPage - 1, safeCurrentPage, safeCurrentPage + 1, "...", totalPages];
+  };
 
   return (
     <>
@@ -196,53 +262,130 @@ export default function SearchPage() {
               </div>
 
               {activeResults.length > 0 ? (
-                <div className="search-grid">
-                  {activeResults.map((product, index) => {
-                    const name = product.name || product.title || "Product";
-                    const image =
-                      product.image ||
-                      product.image_url ||
-                      product.images?.[0] ||
-                      "/images/shop-banner.png";
+                <>
+                  <div className="search-grid">
+                    {paginatedResults.map((product, index) => {
+                      const name = product.name || product.title || "Product";
+                      const image =
+                        product.image ||
+                        product.image_url ||
+                        product.images?.[0] ||
+                        "/images/shop-banner.png";
 
-                    return (
-                      <Link
-                        href={`/product/${product.id}`}
-                        className="search-product-card"
-                        key={product.id ?? index}
-                      >
-                        <div className="search-image-wrap">
-                          <img src={image} alt={name} loading="lazy" />
+                      return (
+                        <div
+                          className="search-product-card"
+                          key={product.id ?? index}
+                        >
+                          <Link
+                            href={`/product/${product.id}`}
+                            className="search-image-wrap"
+                          >
+                            <img src={image} alt={name} loading="lazy" />
 
-                          {searchMode === "ai" && product.matchScore && (
-                            <span className="ai-match-score-badge">
-                              {product.matchScore}% Match
-                            </span>
+                            {searchMode === "ai" && product.matchScore && (
+                              <span className="ai-match-score-badge">
+                                {product.matchScore}% Match
+                              </span>
+                            )}
+                          </Link>
+
+                          <div className="search-product-info">
+                            <Link href={`/product/${product.id}`} className="search-info-link">
+                              <span className="search-card-category">
+                                {product.category} {product.subcategory ? `• ${product.subcategory}` : ""}
+                              </span>
+                              <h3>{name}</h3>
+
+                              {searchMode === "ai" && product.matchReason && (
+                                <div className="ai-match-reason-tag">
+                                  ✦ {product.matchReason}
+                                </div>
+                              )}
+
+                              {product.price != null && (
+                                <strong className="search-product-price">
+                                  ₹{Number(product.price).toLocaleString("en-IN")}
+                                </strong>
+                              )}
+                            </Link>
+
+                            <button
+                              type="button"
+                              className={`search-card-add-btn ${addedItemIds[product.id] ? "is-added" : ""}`}
+                              onClick={(e) => handleQuickAddToCart(e, product)}
+                              aria-label={`Add ${name} to bag`}
+                            >
+                              {addedItemIds[product.id] ? (
+                                <>
+                                  <Check size={13} />
+                                  <span>Added</span>
+                                </>
+                              ) : (
+                                <>
+                                  <ShoppingBag size={13} />
+                                  <span>Add to Bag</span>
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  {/* Search Pagination Controls (when more than 8 results) */}
+                  {totalPages > 1 && (
+                    <div className="search-pagination-wrap">
+                      <div className="search-pagination-info">
+                        Showing <strong>{startIndex + 1}–{endIndex}</strong> of <strong>{totalResults}</strong> matches
+                      </div>
+
+                      <div className="search-pagination-controls">
+                        <button
+                          type="button"
+                          className="search-pagination-btn"
+                          disabled={safeCurrentPage === 1}
+                          onClick={() => handlePageChange(safeCurrentPage - 1)}
+                          aria-label="Previous Page"
+                        >
+                          <ChevronLeft size={15} />
+                          <span>Previous</span>
+                        </button>
+
+                        <div className="search-pagination-pages">
+                          {getPageNumbers().map((page, idx) =>
+                            page === "..." ? (
+                              <span key={`ellipsis-${idx}`} className="search-pagination-ellipsis">
+                                …
+                              </span>
+                            ) : (
+                              <button
+                                key={page}
+                                type="button"
+                                className={`search-pagination-number ${safeCurrentPage === page ? "active" : ""}`}
+                                onClick={() => handlePageChange(page)}
+                              >
+                                {page}
+                              </button>
+                            )
                           )}
                         </div>
 
-                        <div className="search-product-info">
-                          <span className="search-card-category">
-                            {product.category} {product.subcategory ? `• ${product.subcategory}` : ""}
-                          </span>
-                          <h3>{name}</h3>
-
-                          {searchMode === "ai" && product.matchReason && (
-                            <div className="ai-match-reason-tag">
-                              ✦ {product.matchReason}
-                            </div>
-                          )}
-
-                          {product.price != null && (
-                            <strong className="search-product-price">
-                              ₹{Number(product.price).toLocaleString("en-IN")}
-                            </strong>
-                          )}
-                        </div>
-                      </Link>
-                    );
-                  })}
-                </div>
+                        <button
+                          type="button"
+                          className="search-pagination-btn"
+                          disabled={safeCurrentPage === totalPages}
+                          onClick={() => handlePageChange(safeCurrentPage + 1)}
+                          aria-label="Next Page"
+                        >
+                          <span>Next</span>
+                          <ChevronRight size={15} />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </>
               ) : (
                 <div className="search-empty">
                   <Search size={36} />

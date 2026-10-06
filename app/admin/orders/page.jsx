@@ -13,6 +13,8 @@ import {
   Calendar,
   CreditCard,
   Layers,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 const statuses = [
@@ -56,6 +58,8 @@ export default function AdminOrdersPage() {
   const [filter, setFilter] = useState("all");
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [updatingId, setUpdatingId] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(8);
 
   const loadOrders = useCallback(async () => {
     setLoading(true);
@@ -163,6 +167,31 @@ export default function AdminOrdersPage() {
     return matchesSearch && matchesStatus;
   });
 
+  const totalFiltered = filteredOrders.length;
+  const totalPages = Math.max(1, Math.ceil(totalFiltered / itemsPerPage));
+  const safeCurrentPage = Math.min(Math.max(currentPage, 1), totalPages);
+  const startIndex = (safeCurrentPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, totalFiltered);
+  const paginatedOrders = filteredOrders.slice(startIndex, endIndex);
+
+  const getAdminPageNumbers = () => {
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    if (safeCurrentPage <= 4) {
+      return [1, 2, 3, 4, 5, "...", totalPages];
+    }
+    if (safeCurrentPage >= totalPages - 3) {
+      return [1, "...", totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+    }
+    return [1, "...", safeCurrentPage - 1, safeCurrentPage, safeCurrentPage + 1, "...", totalPages];
+  };
+
+  const handleAdminPageChange = (newPage) => {
+    if (newPage < 1 || newPage > totalPages || newPage === safeCurrentPage) return;
+    setCurrentPage(newPage);
+  };
+
   const totalValue = orders.reduce(
     (sum, order) => sum + Number(order.total || 0),
     0
@@ -256,14 +285,20 @@ export default function AdminOrdersPage() {
                 type="search"
                 placeholder="Search by order ID, customer name, or email..."
                 value={search}
-                onChange={(event) => setSearch(event.target.value)}
+                onChange={(event) => {
+                  setSearch(event.target.value);
+                  setCurrentPage(1);
+                }}
                 aria-label="Search orders"
               />
 
               <select
                 className="saas-select-filter"
                 value={filter}
-                onChange={(event) => setFilter(event.target.value)}
+                onChange={(event) => {
+                  setFilter(event.target.value);
+                  setCurrentPage(1);
+                }}
                 aria-label="Filter orders by status"
               >
                 <option value="all">All Statuses</option>
@@ -309,7 +344,7 @@ export default function AdminOrdersPage() {
                 </thead>
 
                 <tbody>
-                  {filteredOrders.map((order) => {
+                  {paginatedOrders.map((order) => {
                     const statusStr = String(order.status || "pending").toLowerCase();
                     const isDelivered = statusStr === "delivered";
 
@@ -418,8 +453,73 @@ export default function AdminOrdersPage() {
             </div>
           )}
 
+          {/* Admin SaaS Pagination Bar */}
+          {totalPages > 1 && (
+            <div className="saas-pagination-bar">
+              <div className="saas-pagination-info">
+                Showing <strong>{startIndex + 1}–{endIndex}</strong> of <strong>{totalFiltered}</strong> orders
+              </div>
+
+              <div className="saas-pagination-actions">
+                <div className="saas-pagination-controls">
+                  <button
+                    type="button"
+                    className="saas-page-btn"
+                    disabled={safeCurrentPage === 1}
+                    onClick={() => handleAdminPageChange(safeCurrentPage - 1)}
+                    aria-label="Previous Page"
+                  >
+                    <ChevronLeft size={14} />
+                    <span>Prev</span>
+                  </button>
+
+                  {getAdminPageNumbers().map((p, idx) =>
+                    p === "..." ? (
+                      <span key={`admin-dots-${idx}`} style={{ padding: "0 6px", color: "#94a3b8" }}>…</span>
+                    ) : (
+                      <button
+                        key={`admin-page-${p}`}
+                        type="button"
+                        className={`saas-page-num ${safeCurrentPage === p ? "active" : ""}`}
+                        onClick={() => handleAdminPageChange(p)}
+                      >
+                        {p}
+                      </button>
+                    )
+                  )}
+
+                  <button
+                    type="button"
+                    className="saas-page-btn"
+                    disabled={safeCurrentPage === totalPages}
+                    onClick={() => handleAdminPageChange(safeCurrentPage + 1)}
+                    aria-label="Next Page"
+                  >
+                    <span>Next</span>
+                    <ChevronRight size={14} />
+                  </button>
+                </div>
+
+                <select
+                  className="saas-per-page-select"
+                  value={itemsPerPage}
+                  onChange={(e) => {
+                    setItemsPerPage(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                  aria-label="Orders per page"
+                >
+                  <option value={8}>8 per page</option>
+                  <option value={16}>16 per page</option>
+                  <option value={24}>24 per page</option>
+                  <option value={48}>48 per page</option>
+                </select>
+              </div>
+            </div>
+          )}
+
           <div className="saas-card-footer">
-            <span>Showing {filteredOrders.length} of {orders.length} orders</span>
+            <span>Showing {totalFiltered > 0 ? `${startIndex + 1}–${endIndex}` : 0} of {totalFiltered} filtered ({orders.length} total) orders</span>
           </div>
         </section>
       </div>

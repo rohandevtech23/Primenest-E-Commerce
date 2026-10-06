@@ -261,7 +261,7 @@ export default function AdminPage() {
   return (
     <main className="saas-admin-container">
       {/* Top Navbar / Header Bar */}
-      <header className="saas-header">
+      <header className="saas-overview-header">
         {/* Top category navigation breadcrumb row */}
         <div className="saas-nav-tabs-row">
           <div className="saas-nav-tabs">
@@ -317,7 +317,7 @@ export default function AdminPage() {
 
         {/* Title row */}
         <div className="saas-title-row">
-          <div>
+          <div className="saas-title-left">
             <h1 className="saas-page-title">Overview</h1>
           </div>
 
@@ -766,9 +766,12 @@ export default function AdminPage() {
                 </button>
               </div>
 
-              <Link href="/admin/orders" className="saas-link-viewall">
+              <Link
+                href={activeTab === "orders" ? "/admin/orders" : "/admin/products"}
+                className="saas-link-viewall"
+              >
                 <span>View all</span>
-                <ArrowUpRight size={13} />
+                <ArrowUpRight size={13} className="saas-link-viewall-arrow" />
               </Link>
             </div>
 
@@ -822,8 +825,8 @@ export default function AdminPage() {
                 {[
                   { name: "Men's Apparel", count: "10 products", share: "18.5%" },
                   { name: "Women's Collection", count: "10 products", share: "18.5%" },
-                  { name: "Accessories & Bags", count: "7 products", share: "13.0%" },
-                  { name: "Beauty & Personal Care", count: "6 products", share: "11.1%" },
+                  { name: "Accessories & Bags", count: "27 products", share: "12.2%" },
+                  { name: "Footwear & Kicks", count: "58 products", share: "26.2%" },
                 ].map((cat) => (
                   <div key={cat.name} className="saas-cat-row">
                     <div className="saas-cat-info">
@@ -850,18 +853,22 @@ export default function AdminPage() {
         }
 
         /* Top Header */
+        .saas-overview-header,
         .saas-header {
-          display: flex;
-          flex-direction: column;
-          gap: 16px;
-          margin-bottom: 24px;
+          display: flex !important;
+          flex-direction: column !important;
+          align-items: stretch !important;
+          width: 100% !important;
+          gap: 16px !important;
+          margin-bottom: 24px !important;
         }
 
         .saas-nav-tabs-row {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 16px;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: space-between !important;
+          width: 100% !important;
+          gap: 16px !important;
         }
 
         .saas-nav-tabs {
@@ -1061,24 +1068,34 @@ export default function AdminPage() {
 
         /* Title Row */
         .saas-title-row {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding-top: 4px;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: space-between !important;
+          width: 100% !important;
+          padding-top: 4px !important;
+        }
+
+        .saas-title-left {
+          display: flex !important;
+          align-items: center !important;
+          justify-content: flex-start !important;
+          text-align: left !important;
         }
 
         .saas-page-title {
-          font-size: 26px;
-          font-weight: 700;
-          color: #0f172a;
-          letter-spacing: -0.4px;
-          margin: 0;
+          font-size: 26px !important;
+          font-weight: 700 !important;
+          color: #0f172a !important;
+          letter-spacing: -0.4px !important;
+          margin: 0 !important;
+          text-align: left !important;
         }
 
         .saas-title-actions {
-          display: flex;
-          align-items: center;
-          gap: 8px;
+          display: flex !important;
+          align-items: center !important;
+          gap: 8px !important;
+          margin-left: auto !important;
         }
 
         .saas-btn-action {
@@ -1672,15 +1689,41 @@ export default function AdminPage() {
         .saas-link-viewall {
           display: inline-flex;
           align-items: center;
-          gap: 3px;
+          gap: 6px;
+          height: 32px;
+          padding: 0 12px;
+          background: #ffffff;
+          border: 1px solid #e2e8f0;
+          border-radius: 9px;
           font-size: 12px;
-          color: #2563eb;
-          font-weight: 600;
+          font-weight: 500;
+          color: #334155;
           text-decoration: none;
+          cursor: pointer;
+          white-space: nowrap;
+          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+          transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .saas-link-viewall:hover {
-          text-decoration: underline;
+          background: #f8fafc;
+          border-color: #cbd5e1;
+          color: #0f172a;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+          text-decoration: none;
+        }
+
+        .saas-link-viewall :global(.saas-link-viewall-arrow),
+        .saas-link-viewall :global(svg) {
+          color: #64748b;
+          transition: transform 0.18s ease, color 0.18s ease;
+          flex-shrink: 0;
+        }
+
+        .saas-link-viewall:hover :global(.saas-link-viewall-arrow),
+        .saas-link-viewall:hover :global(svg) {
+          color: #2563eb;
+          transform: translate(1px, -1px);
         }
 
         .saas-table-wrap {

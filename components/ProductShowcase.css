@@ -1,0 +1,539 @@
+/* =========================================================================
+   PRIME NEST - LATEST ARRIVALS LUXURY SHOWCASE
+   Haute-Couture Editorial Aesthetics, Modern Typography & Fluid Micro-Animations
+   ========================================================================= */
+
+.product-showcase {
+  width: min(1520px, 92%);
+  margin: 0 auto;
+  padding: 24px 0 90px;
+  position: relative;
+}
+
+/* -------------------------------------------------------------------------
+   1. SECTION HEADING & EDITORIAL HEADER
+   ------------------------------------------------------------------------- */
+.product-showcase-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+  margin-bottom: 36px;
+  flex-wrap: wrap;
+}
+
+.product-showcase-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  color: #b89146;
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 3.5px;
+  text-transform: uppercase;
+}
+
+.product-showcase-eyebrow .sparkle-icon {
+  animation: sparkleTwinkle 3s ease-in-out infinite;
+}
+
+@keyframes sparkleTwinkle {
+  0%, 100% { opacity: 0.6; transform: scale(0.9) rotate(0deg); }
+  50% { opacity: 1; transform: scale(1.15) rotate(15deg); }
+}
+
+.product-showcase-title {
+  margin: 0;
+  color: #121212;
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif;
+  font-size: clamp(42px, 5.5vw, 68px);
+  font-weight: 350;
+  line-height: 1.02;
+  letter-spacing: -2px;
+}
+
+.product-showcase-title em {
+  font-family: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.5px;
+  color: #1a1a1a;
+  margin-left: 6px;
+}
+
+.product-showcase-nav-wrap {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.showcase-view-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1.5px solid #1a1a1a;
+  color: #121212;
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.showcase-view-all span.arrow {
+  display: inline-block;
+  font-size: 15px;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.showcase-view-all:hover {
+  color: #b89146;
+  border-bottom-color: #b89146;
+  gap: 16px;
+}
+
+.showcase-view-all:hover span.arrow {
+  transform: translate(3px, -3px);
+}
+
+/* -------------------------------------------------------------------------
+   2. CATEGORY FILTER TABS
+   ------------------------------------------------------------------------- */
+.showcase-tabs-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 40px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scrollbar-width: none;
+}
+
+.showcase-tabs-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.showcase-tab-btn {
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: 1px solid #e7e2d9;
+  background: #ffffff;
+  color: #6a645d;
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.showcase-tab-btn:hover {
+  border-color: #121212;
+  color: #121212;
+  transform: translateY(-1px);
+}
+
+.showcase-tab-btn.active {
+  background: #121212;
+  border-color: #c8a355;
+  color: #f3d78c;
+  box-shadow: 0 6px 18px rgba(200, 163, 85, 0.28);
+}
+
+/* -------------------------------------------------------------------------
+   3. PRODUCT SHOWCASE GRID
+   ------------------------------------------------------------------------- */
+.product-showcase-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+/* -------------------------------------------------------------------------
+   4. LUXURY PRODUCT CARD
+   ------------------------------------------------------------------------- */
+.showcase-card {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: transparent;
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: showcaseFadeIn 0.65s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+@keyframes showcaseFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.showcase-card:hover {
+  transform: translateY(-6px);
+}
+
+/* -------------------------------------------------------------------------
+   5. IMAGE CONTAINER & DUAL ANGLE REVEAL
+   ------------------------------------------------------------------------- */
+.showcase-img-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 0.82;
+  overflow: hidden;
+  background: #f4f2ee;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+  transition: box-shadow 0.4s ease, border-color 0.4s ease;
+}
+
+.showcase-card:hover .showcase-img-wrap {
+  box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.16);
+  border-color: rgba(212, 175, 55, 0.3);
+}
+
+.showcase-img-primary,
+.showcase-img-secondary {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.85s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s ease;
+}
+
+.showcase-img-secondary {
+  opacity: 0;
+}
+
+.showcase-card:hover .showcase-img-primary {
+  transform: scale(1.07);
+}
+
+.showcase-card:hover .showcase-img-secondary {
+  opacity: 1;
+  transform: scale(1.07);
+}
+
+/* Fallback background when no image */
+.showcase-img-placeholder {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(135deg, #f4f2ee 0%, #e8e3d9 100%);
+  color: #a89f91;
+  font-family: var(--font-jakarta), sans-serif;
+  font-size: 11px;
+  letter-spacing: 1px;
+}
+
+/* -------------------------------------------------------------------------
+   6. SHIMMERING METALLIC BADGES
+   ------------------------------------------------------------------------- */
+.showcase-badge {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 3;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(220, 215, 205, 0.6);
+  color: #121212;
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  border-radius: 2px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.showcase-badge::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -60%;
+  width: 40%;
+  height: 200%;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(184, 145, 70, 0.28) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: rotate(25deg);
+  animation: badgeSweep 4.5s ease-in-out infinite;
+}
+
+@keyframes badgeSweep {
+  0% { transform: translateX(-150%) rotate(25deg); }
+  35%, 100% { transform: translateX(350%) rotate(25deg); }
+}
+
+.showcase-badge.badge-gold {
+  background: #121212;
+  color: #d4af37;
+  border-color: rgba(212, 175, 55, 0.35);
+}
+
+/* -------------------------------------------------------------------------
+   7. WISHLIST BUTTON & HEART ANIMATION
+   ------------------------------------------------------------------------- */
+.showcase-wishlist-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 3;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(8px);
+  display: grid;
+  place-items: center;
+  color: #121212;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.07);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.showcase-wishlist-btn:hover {
+  background: #ffffff;
+  transform: scale(1.12);
+  color: #e11d48;
+}
+
+.showcase-wishlist-btn.wishlisted {
+  color: #e11d48;
+  background: #ffffff;
+  animation: heartPop 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes heartPop {
+  0% { transform: scale(0.8); }
+  50% { transform: scale(1.28); }
+  100% { transform: scale(1); }
+}
+
+/* -------------------------------------------------------------------------
+   8. SLIDE-UP "ADD TO BAG" ACTION
+   ------------------------------------------------------------------------- */
+.showcase-cart-btn {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 3;
+  height: 46px;
+  border: none;
+  border-radius: 3px;
+  background: #ffffff;
+  color: #121212;
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(14px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.14);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.showcase-card:hover .showcase-cart-btn {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.showcase-cart-btn:hover {
+  background: #121212;
+  color: #ffffff;
+  box-shadow: 0 8px 24px rgba(18, 18, 18, 0.28);
+}
+
+.showcase-cart-btn.added {
+  background: #0f172a;
+  color: #22c55e;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* -------------------------------------------------------------------------
+   9. PRODUCT INFO & TYPOGRAPHY
+   ------------------------------------------------------------------------- */
+.showcase-info {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 16px;
+}
+
+.showcase-text-wrap {
+  min-width: 0;
+  flex: 1;
+}
+
+.showcase-category-sub {
+  margin: 0 0 6px;
+  color: #8f867c;
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+}
+
+.showcase-title-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.showcase-title {
+  margin: 0;
+  color: #121212;
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif;
+  font-size: 14.5px;
+  font-weight: 500;
+  line-height: 1.38;
+  letter-spacing: -0.2px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  transition: color 0.25s ease;
+}
+
+.showcase-title-link:hover .showcase-title {
+  color: #b89146;
+}
+
+.showcase-price {
+  margin: 0;
+  flex-shrink: 0;
+  color: #121212;
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif;
+  font-size: 14.5px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  padding-top: 1px;
+}
+
+/* -------------------------------------------------------------------------
+   10. SKELETON LOADERS
+   ------------------------------------------------------------------------- */
+.showcase-skeleton-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.showcase-skeleton-img {
+  width: 100%;
+  aspect-ratio: 0.82;
+  background: linear-gradient(90deg, #edeae5 25%, #f7f5f2 50%, #edeae5 75%);
+  background-size: 200% 100%;
+  animation: skeletonPulse 1.6s infinite ease-in-out;
+  border-radius: 4px;
+}
+
+.showcase-skeleton-line {
+  height: 12px;
+  background: #edeae5;
+  border-radius: 4px;
+}
+
+@keyframes skeletonPulse {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* -------------------------------------------------------------------------
+   11. RESPONSIVE MEDIA QUERIES
+   ------------------------------------------------------------------------- */
+@media (max-width: 1200px) {
+  .product-showcase-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+}
+
+@media (max-width: 860px) {
+  .product-showcase {
+    padding: 70px 0 90px;
+  }
+
+  .product-showcase-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .showcase-cart-btn {
+    opacity: 1;
+    transform: translateY(0);
+    height: 40px;
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 540px) {
+  .product-showcase-header {
+    display: block;
+  }
+
+  .product-showcase-nav-wrap {
+    margin-top: 18px;
+  }
+
+  .product-showcase-title {
+    font-size: 38px;
+  }
+
+  .product-showcase-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .showcase-badge {
+    top: 8px;
+    left: 8px;
+    padding: 4px 8px;
+    font-size: 8px;
+  }
+
+  .showcase-wishlist-btn {
+    top: 8px;
+    right: 8px;
+    width: 32px;
+    height: 32px;
+  }
+
+  .showcase-title {
+    font-size: 13px;
+  }
+
+  .showcase-price {
+    font-size: 13px;
+  }
+}

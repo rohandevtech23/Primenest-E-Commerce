@@ -103,38 +103,6 @@ const catalog = [
   },
   {
     categorySlug: "men",
-    name: "Tailored Italian Poplin Formal Shirt",
-    slug: "tailored-italian-poplin-formal-shirt",
-    subcategory: "Formal Shirts",
-    description: "Crisp two-ply Egyptian cotton poplin dress shirt featuring semi-spread collar, mother-of-pearl buttons, and easy-iron treatment.",
-    price: 2499.00,
-    stock: 25,
-    variant_label: "Collar Size",
-    variants: [
-      { label: "39", stock: 8 },
-      { label: "40", stock: 10 },
-      { label: "42", stock: 7 }
-    ],
-    image: "https://images.unsplash.com/photo-1620012253295-c15c429fbb41?auto=format&fit=crop&w=900&q=85"
-  },
-  {
-    categorySlug: "men",
-    name: "French Terry Pullover Hoodie",
-    slug: "french-terry-pullover-hoodie",
-    subcategory: "Sweatshirts",
-    description: "Loopback organic cotton fleece hoodie with double-layer hood, kangaroo pocket, and ribbed side gussets.",
-    price: 2799.00,
-    stock: 35,
-    variant_label: "Size",
-    variants: [
-      { label: "S", stock: 8 },
-      { label: "M", stock: 15 },
-      { label: "L", stock: 12 }
-    ],
-    image: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=900&q=85"
-  },
-  {
-    categorySlug: "men",
     name: "Heritage Suede Bomber Jacket",
     slug: "heritage-suede-bomber-jacket",
     subcategory: "Jackets",
@@ -250,37 +218,6 @@ const catalog = [
   },
   {
     categorySlug: "women",
-    name: "Chanderi Handblock Printed Kurta Set",
-    slug: "chanderi-handblock-printed-kurta-set",
-    subcategory: "Kurtas",
-    description: "Artisanal handblock printed Chanderi silk kurta with delicate zari borders, matching palazzo pants, and organza dupatta.",
-    price: 3499.00,
-    stock: 20,
-    variant_label: "Size",
-    variants: [
-      { label: "S", stock: 6 },
-      { label: "M", stock: 8 },
-      { label: "L", stock: 6 }
-    ],
-    image: "https://images.unsplash.com/photo-1610030469983-98e550d6193c?auto=format&fit=crop&w=900&q=85"
-  },
-  {
-    categorySlug: "women",
-    name: "Pastel Anarkali Festive Kurti",
-    slug: "pastel-anarkali-festive-kurti",
-    subcategory: "Kurtis",
-    description: "Floor-length flared Anarkali kurti in soothing pastel tones with intricate gota patti neckline work and breathable cotton lining.",
-    price: 2799.00,
-    stock: 22,
-    variant_label: "Size",
-    variants: [
-      { label: "M", stock: 12 },
-      { label: "L", stock: 10 }
-    ],
-    image: "https://images.unsplash.com/photo-1583391733956-3750e0ff4e8b?auto=format&fit=crop&w=900&q=85"
-  },
-  {
-    categorySlug: "women",
     name: "High-Rise Wide Leg Vintage Jeans",
     slug: "high-rise-wide-leg-vintage-jeans",
     subcategory: "Jeans",
@@ -294,21 +231,6 @@ const catalog = [
       { label: "30", stock: 12 }
     ],
     image: "https://images.unsplash.com/photo-1584370848010-d7fe6bc767ec?auto=format&fit=crop&w=900&q=85"
-  },
-  {
-    categorySlug: "women",
-    name: "Pleated Satin A-Line Skirt",
-    slug: "pleated-satin-aline-skirt",
-    subcategory: "Shorts & Skirts",
-    description: "Sunburst accordion-pleated midi skirt in glossy champagne satin with hidden elastic waistband for fluid movement.",
-    price: 1899.00,
-    stock: 24,
-    variant_label: "Size",
-    variants: [
-      { label: "S", stock: 10 },
-      { label: "M", stock: 14 }
-    ],
-    image: "https://images.unsplash.com/photo-1583496661160-fb5886a0aaaa?auto=format&fit=crop&w=900&q=85"
   },
 
   // ==========================================
@@ -536,38 +458,6 @@ const catalog = [
       { label: "UK 10", stock: 5 }
     ],
     image: "https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?auto=format&fit=crop&w=900&q=85"
-  },
-  {
-    categorySlug: "footwear",
-    name: "Handcrafted Penny Loafers",
-    slug: "handcrafted-penny-loafers",
-    subcategory: "Loafers",
-    description: "Timeless slip-on dress loafers made with burnished box calf leather, Blake stitch sole construction, and comfortable leather lining.",
-    price: 4299.00,
-    stock: 22,
-    variant_label: "Shoe Size",
-    variants: [
-      { label: "UK 8", stock: 8 },
-      { label: "UK 9", stock: 8 },
-      { label: "UK 10", stock: 6 }
-    ],
-    image: "https://images.unsplash.com/photo-1614252235316-8c857d38b5f4?auto=format&fit=crop&w=900&q=85"
-  },
-  {
-    categorySlug: "footwear",
-    name: "Cap-Toe Oxford Dress Shoes",
-    slug: "cap-toe-oxford-dress-shoes",
-    subcategory: "Formal Shoes",
-    description: "Formal closed-lacing dress shoes handcrafted from full-grain French calfskin with hand-painted patina finish and channelled leather sole.",
-    price: 4799.00,
-    stock: 18,
-    variant_label: "Shoe Size",
-    variants: [
-      { label: "UK 7", stock: 4 },
-      { label: "UK 8", stock: 8 },
-      { label: "UK 9", stock: 6 }
-    ],
-    image: "https://images.unsplash.com/photo-1533867617858-e7b97e060509?auto=format&fit=crop&w=900&q=85"
   },
   {
     categorySlug: "footwear",

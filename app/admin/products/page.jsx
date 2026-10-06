@@ -4,56 +4,47 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { ChevronDown, Check, Search, Plus, Trash2, Image as ImageIcon } from "lucide-react";
+import { ChevronDown, Check, Search, Plus, Trash2, Image as ImageIcon, FileSpreadsheet, Sparkles, ChevronLeft, ChevronRight } from "lucide-react";
+import ProductImportModal from "@/components/admin/ProductImportModal";
 
 const subcategoryOptions = {
   men: [
     "T-Shirts",
     "Polo T-Shirts",
     "Casual Shirts",
-    "Formal Shirts",
-    "Hoodies",
     "Sweatshirts",
-    "Sweaters",
+    "Hoodies",
     "Jackets",
     "Blazers",
     "Jeans",
     "Casual Trousers",
-    "Formal Trousers",
     "Track Pants & Joggers",
-    "Shorts",
     "Ethnic Wear",
+    "Flip Flops",
   ],
   women: [
     "Dresses",
     "Tops",
     "T-Shirts",
+    "Sweatshirts",
     "Shirts",
     "Jeans",
     "Trousers",
-    "Skirts",
-    "Leggings",
-    "Kurtis",
     "Sarees",
     "Jackets",
     "Hoodies",
-    "Sweaters",
     "Blazers",
-    "Co-ord Sets",
   ],
   footwear: [
+    "Flip Flops",
     "Men's Sneakers",
     "Men's Casual Shoes",
-    "Men's Formal Shoes",
     "Men's Sports Shoes",
-    "Men's Sandals",
     "Men's Slippers",
     "Women's Sneakers",
     "Women's Casual Shoes",
-    "Women's Formal Shoes",
     "Women's Sports Shoes",
     "Women's Heels",
-    "Women's Sandals",
     "Women's Flats",
     "Women's Slippers",
     "Boots",
@@ -61,25 +52,13 @@ const subcategoryOptions = {
   accessories: [
     "Bags",
     "Backpacks",
-    "Wallets",
     "Watches",
     "Sunglasses",
-    "Belts",
     "Caps",
     "Hats",
     "Jewellery",
     "Scarves",
     "Ties",
-  ],
-  beauty: [
-    "Skincare",
-    "Makeup",
-    "Haircare",
-    "Body Care",
-    "Face Wash",
-    "Moisturizers",
-    "Lip Care",
-    "Sunscreen",
   ],
   perfume: [
     "Men's Perfume",
@@ -90,45 +69,8 @@ const subcategoryOptions = {
     "Perfume Oils",
     "Gift Sets",
   ],
-  "home essentials": [
-    "Bedding",
-    "Cushions",
-    "Curtains",
-    "Home Decor",
-    "Lighting",
-    "Kitchen Essentials",
-    "Storage",
-    "Bathroom Accessories",
-    "Cleaning Supplies",
-  ],
-  home: [
-    "Bedding",
-    "Cushions",
-    "Curtains",
-    "Home Decor",
-    "Lighting",
-    "Kitchen Essentials",
-    "Storage",
-    "Bathroom Accessories",
-    "Cleaning Supplies",
-  ],
-  kids: [
-    "Boys Clothing",
-    "Girls Clothing",
-    "Baby Clothing",
-    "T-Shirts",
-    "Shirts",
-    "Dresses",
-    "Jeans",
-    "Shorts",
-    "Hoodies",
-    "Footwear",
-    "Toys",
-    "School Bags",
-  ],
 };
 
-   
 function getSubcategoryOptions(category) {
   if (!category) return [];
 
@@ -146,14 +88,10 @@ function getSubcategoryOptions(category) {
     womens: "women",
     "women s": "women",
     accessories: "accessories",
-    home: "home essentials",
-    "home essentials": "home essentials",
     perfume: "perfume",
     perfumes: "perfume",
     footwear: "footwear",
     shoes: "footwear",
-    kids: "kids",
-    beauty: "beauty",
   };
 
   return subcategoryOptions[aliases[key] || key] || [];
@@ -452,10 +390,17 @@ export default function AdminProductsPage() {
   const [isAddingNewSubcategory, setIsAddingNewSubcategory] = useState(false);
   const [newSubcategoryInput, setNewSubcategoryInput] = useState("");
   const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(8);
   const [loading, setLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, itemsPerPage]);
 
   const [form, setForm] = useState({
     name: "",
@@ -770,6 +715,31 @@ const saveProduct = async (event) => {
     0
   );
 
+  const totalFiltered = filteredProducts.length;
+  const totalPages = Math.max(1, Math.ceil(totalFiltered / itemsPerPage));
+  const safeCurrentPage = Math.min(Math.max(currentPage, 1), totalPages);
+  const startIndex = (safeCurrentPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, totalFiltered);
+  const paginatedProducts = filteredProducts.slice(startIndex, endIndex);
+
+  const getAdminPageNumbers = () => {
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    if (safeCurrentPage <= 4) {
+      return [1, 2, 3, 4, 5, "...", totalPages];
+    }
+    if (safeCurrentPage >= totalPages - 3) {
+      return [1, "...", totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+    }
+    return [1, "...", safeCurrentPage - 1, safeCurrentPage, safeCurrentPage + 1, "...", totalPages];
+  };
+
+  const handleAdminPageChange = (newPage) => {
+    if (newPage < 1 || newPage > totalPages || newPage === safeCurrentPage) return;
+    setCurrentPage(newPage);
+  };
+
   return (
     <main className="saas-products-page">
       <div className="saas-products-container">
@@ -784,6 +754,15 @@ const saveProduct = async (event) => {
           </div>
 
           <div className="saas-header-actions">
+            <button
+              type="button"
+              className="saas-btn-import"
+              onClick={() => setIsImportModalOpen(true)}
+              title="Import products in bulk from CSV or Excel file"
+            >
+              <FileSpreadsheet size={15} />
+              <span>Import CSV / Excel</span>
+            </button>
             <button
               type="button"
               className="saas-btn-add"
@@ -878,7 +857,7 @@ const saveProduct = async (event) => {
                 </thead>
 
                 <tbody>
-                  {filteredProducts.map((product) => {
+                  {paginatedProducts.map((product) => {
                     const isLow = Number(product.stock || 0) <= 5;
                     return (
                       <tr key={product.id}>
@@ -948,8 +927,73 @@ const saveProduct = async (event) => {
             </div>
           )}
 
+          {/* Admin SaaS Pagination Bar */}
+          {totalPages > 1 && (
+            <div className="saas-pagination-bar">
+              <div className="saas-pagination-info">
+                Showing <strong>{startIndex + 1}–{endIndex}</strong> of <strong>{totalFiltered}</strong> items
+              </div>
+
+              <div className="saas-pagination-actions">
+                <div className="saas-pagination-controls">
+                  <button
+                    type="button"
+                    className="saas-page-btn"
+                    disabled={safeCurrentPage === 1}
+                    onClick={() => handleAdminPageChange(safeCurrentPage - 1)}
+                    aria-label="Previous Page"
+                  >
+                    <ChevronLeft size={14} />
+                    <span>Prev</span>
+                  </button>
+
+                  {getAdminPageNumbers().map((p, idx) =>
+                    p === "..." ? (
+                      <span key={`admin-dots-${idx}`} style={{ padding: "0 6px", color: "#94a3b8" }}>…</span>
+                    ) : (
+                      <button
+                        key={`admin-page-${p}`}
+                        type="button"
+                        className={`saas-page-num ${safeCurrentPage === p ? "active" : ""}`}
+                        onClick={() => handleAdminPageChange(p)}
+                      >
+                        {p}
+                      </button>
+                    )
+                  )}
+
+                  <button
+                    type="button"
+                    className="saas-page-btn"
+                    disabled={safeCurrentPage === totalPages}
+                    onClick={() => handleAdminPageChange(safeCurrentPage + 1)}
+                    aria-label="Next Page"
+                  >
+                    <span>Next</span>
+                    <ChevronRight size={14} />
+                  </button>
+                </div>
+
+                <select
+                  className="saas-per-page-select"
+                  value={itemsPerPage}
+                  onChange={(e) => {
+                    setItemsPerPage(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                  aria-label="Items per page"
+                >
+                  <option value={8}>8 per page</option>
+                  <option value={16}>16 per page</option>
+                  <option value={24}>24 per page</option>
+                  <option value={48}>48 per page</option>
+                </select>
+              </div>
+            </div>
+          )}
+
           <div className="saas-card-footer">
-            <span>Showing {filteredProducts.length} of {products.length} products</span>
+            <span>Showing {totalFiltered > 0 ? `${startIndex + 1}–${endIndex}` : 0} of {totalFiltered} filtered ({products.length} total) products</span>
           </div>
         </section>
       </div>
@@ -987,6 +1031,28 @@ const saveProduct = async (event) => {
                 ✕
               </button>
             </div>
+
+            {selectedProduct.id === null && (
+              <div className="saas-modal-import-callout">
+                <div className="saas-modal-import-callout-text">
+                  <FileSpreadsheet size={16} style={{ color: "#2563eb", flexShrink: 0 }} />
+                  <div>
+                    <span style={{ fontWeight: 700, color: "#0f172a" }}>Need to add multiple products? </span>
+                    <span style={{ color: "#475569" }}>Bulk import your catalog & image links directly with CSV or Excel.</span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="saas-modal-callout-btn"
+                  onClick={() => {
+                    closeEdit();
+                    setIsImportModalOpen(true);
+                  }}
+                >
+                  Import File →
+                </button>
+              </div>
+            )}
 
             <form onSubmit={saveProduct}>
               <div className="saas-form-grid">
@@ -1402,6 +1468,16 @@ const saveProduct = async (event) => {
         </div>
       )}
 
+      {/* Bulk Product Import Modal (CSV & Excel) */}
+      {isImportModalOpen && (
+        <ProductImportModal
+          isOpen={isImportModalOpen}
+          onClose={() => setIsImportModalOpen(false)}
+          categories={categories}
+          onImportSuccess={loadProducts}
+        />
+      )}
+
       <style jsx>{`
         .saas-products-page {
           min-height: 100vh;
@@ -1447,6 +1523,36 @@ const saveProduct = async (event) => {
           margin: 0;
         }
 
+        .saas-header-actions {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          flex-wrap: wrap;
+        }
+
+        .saas-btn-import {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          background: linear-gradient(180deg, #ffffff 0%, #f1f5f9 45%, #e2e8f0 100%);
+          color: #0f172a;
+          padding: 9px 18px;
+          border-radius: 9999px;
+          font-size: 13px;
+          font-weight: 700;
+          border: 1px solid rgba(175, 190, 210, 0.9);
+          cursor: pointer;
+          transition: all 0.15s ease;
+          box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06), inset 0 1px 0 #ffffff;
+        }
+
+        .saas-btn-import:hover {
+          background: linear-gradient(180deg, #ffffff 0%, #edf2f7 45%, #dce4ee 100%);
+          border-color: #94a3b8;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 10px rgba(15, 23, 42, 0.1), inset 0 1px 0 #ffffff;
+        }
+
         .saas-btn-add {
           display: inline-flex;
           align-items: center;
@@ -1466,6 +1572,48 @@ const saveProduct = async (event) => {
         .saas-btn-add:hover {
           background: #1e293b;
           transform: translateY(-1px);
+        }
+
+        .saas-modal-import-callout {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 12px 16px;
+          margin-bottom: 20px;
+          background: linear-gradient(135deg, rgba(239, 246, 255, 0.8) 0%, rgba(241, 245, 249, 0.85) 100%);
+          border: 1.5px dashed #93c5fd;
+          border-radius: 14px;
+          gap: 12px;
+          flex-wrap: wrap;
+        }
+
+        .saas-modal-import-callout-text {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          font-size: 12px;
+          color: #334155;
+          line-height: 1.4;
+        }
+
+        .saas-modal-callout-btn {
+          padding: 6px 14px;
+          background: #ffffff;
+          border: 1px solid #93c5fd;
+          color: #2563eb;
+          border-radius: 8px;
+          font-size: 11px;
+          font-weight: 700;
+          cursor: pointer;
+          white-space: nowrap;
+          transition: all 0.15s ease;
+          box-shadow: 0 1px 2px rgba(37, 99, 235, 0.08);
+        }
+
+        .saas-modal-callout-btn:hover {
+          background: #2563eb;
+          color: #ffffff;
+          border-color: #2563eb;
         }
 
         /* 3 Stat Cards */

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const formatCurrency = (amount) =>
   new Intl.NumberFormat("en-IN", {
@@ -18,6 +19,8 @@ export default function AdminCustomersPage() {
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(8);
 
   useEffect(() => {
     let active = true;
@@ -73,6 +76,31 @@ export default function AdminCustomersPage() {
         .some((value) => String(value).toLowerCase().includes(term))
     );
   }, [customers, search]);
+
+  const totalFiltered = filteredCustomers.length;
+  const totalPages = Math.max(1, Math.ceil(totalFiltered / itemsPerPage));
+  const safeCurrentPage = Math.min(Math.max(currentPage, 1), totalPages);
+  const startIndex = (safeCurrentPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, totalFiltered);
+  const paginatedCustomers = filteredCustomers.slice(startIndex, endIndex);
+
+  const getAdminPageNumbers = () => {
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    if (safeCurrentPage <= 4) {
+      return [1, 2, 3, 4, 5, "...", totalPages];
+    }
+    if (safeCurrentPage >= totalPages - 3) {
+      return [1, "...", totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages];
+    }
+    return [1, "...", safeCurrentPage - 1, safeCurrentPage, safeCurrentPage + 1, "...", totalPages];
+  };
+
+  const handleAdminPageChange = (newPage) => {
+    if (newPage < 1 || newPage > totalPages || newPage === safeCurrentPage) return;
+    setCurrentPage(newPage);
+  };
 
   const totalOrders = customers.reduce(
     (sum, customer) => sum + Number(customer.order_count || 0),
@@ -161,7 +189,10 @@ export default function AdminCustomersPage() {
                 className="saas-search-input"
                 type="search"
                 value={search}
-                onChange={(event) => setSearch(event.target.value)}
+                onChange={(event) => {
+                  setSearch(event.target.value);
+                  setCurrentPage(1);
+                }}
                 placeholder="Search customers by name, email, or user ID..."
                 aria-label="Search customers"
               />
@@ -221,7 +252,7 @@ export default function AdminCustomersPage() {
                 </thead>
 
                 <tbody>
-                  {filteredCustomers.map((customer) => {
+                  {paginatedCustomers.map((customer) => {
                     const initial = (customer.name || customer.email || "C")
                       .trim()
                       .charAt(0)
@@ -280,9 +311,74 @@ export default function AdminCustomersPage() {
             </div>
           ) : null}
 
+          {/* Admin SaaS Pagination Bar */}
+          {totalPages > 1 && (
+            <div className="saas-pagination-bar">
+              <div className="saas-pagination-info">
+                Showing <strong>{startIndex + 1}–{endIndex}</strong> of <strong>{totalFiltered}</strong> customers
+              </div>
+
+              <div className="saas-pagination-actions">
+                <div className="saas-pagination-controls">
+                  <button
+                    type="button"
+                    className="saas-page-btn"
+                    disabled={safeCurrentPage === 1}
+                    onClick={() => handleAdminPageChange(safeCurrentPage - 1)}
+                    aria-label="Previous Page"
+                  >
+                    <ChevronLeft size={14} />
+                    <span>Prev</span>
+                  </button>
+
+                  {getAdminPageNumbers().map((p, idx) =>
+                    p === "..." ? (
+                      <span key={`admin-dots-${idx}`} style={{ padding: "0 6px", color: "#94a3b8" }}>…</span>
+                    ) : (
+                      <button
+                        key={`admin-page-${p}`}
+                        type="button"
+                        className={`saas-page-num ${safeCurrentPage === p ? "active" : ""}`}
+                        onClick={() => handleAdminPageChange(p)}
+                      >
+                        {p}
+                      </button>
+                    )
+                  )}
+
+                  <button
+                    type="button"
+                    className="saas-page-btn"
+                    disabled={safeCurrentPage === totalPages}
+                    onClick={() => handleAdminPageChange(safeCurrentPage + 1)}
+                    aria-label="Next Page"
+                  >
+                    <span>Next</span>
+                    <ChevronRight size={14} />
+                  </button>
+                </div>
+
+                <select
+                  className="saas-per-page-select"
+                  value={itemsPerPage}
+                  onChange={(e) => {
+                    setItemsPerPage(Number(e.target.value));
+                    setCurrentPage(1);
+                  }}
+                  aria-label="Customers per page"
+                >
+                  <option value={8}>8 per page</option>
+                  <option value={16}>16 per page</option>
+                  <option value={24}>24 per page</option>
+                  <option value={48}>48 per page</option>
+                </select>
+              </div>
+            </div>
+          )}
+
           <div className="saas-card-footer">
             <span>Customer database records from PrimeNest PostgreSQL</span>
-            <span>Showing {filteredCustomers.length} of {customers.length}</span>
+            <span>Showing {totalFiltered > 0 ? `${startIndex + 1}–${endIndex}` : 0} of {totalFiltered} filtered ({customers.length} total)</span>
           </div>
         </section>
       </div>

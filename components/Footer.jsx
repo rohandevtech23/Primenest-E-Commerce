@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 export default function Footer() {
   const [email, setEmail] = useState("");
@@ -64,9 +65,9 @@ export default function Footer() {
 
         <div className="footer-brand">
 
-          <a href="/" className="footer-logo">
+          <Link href="/" className="footer-logo">
             PRIME<span>NEST</span>
-          </a>
+          </Link>
 
           <p>
             Modern essentials.
@@ -87,11 +88,11 @@ export default function Footer() {
 
           <h3>Shop</h3>
 
-          <a href="/shop">All Products</a>
-          <a href="/men">Men</a>
-          <a href="/women">Women</a>
-          <a href="/accessories">Accessories</a>
-          <a href="/perfume">Perfume</a>
+          <Link href="/shop">All Products</Link>
+          <Link href="/shop?category=men">Men</Link>
+          <Link href="/shop?category=women">Women</Link>
+          <Link href="/shop?category=accessories">Accessories</Link>
+          <Link href="/shop?category=perfume">Perfume</Link>
 
         </div>
 
@@ -100,10 +101,10 @@ export default function Footer() {
 
           <h3>About</h3>
 
-          <a href="/about">Our Story</a>
-          <a href="/about">Philosophy</a>
-          <a href="/journal">Journal</a>
-          <a href="/contact">Contact</a>
+          <Link href="/about">Our Story</Link>
+          <Link href="/about">Philosophy</Link>
+          <Link href="/journal">Journal</Link>
+          <Link href="/contact">Contact</Link>
 
         </div>
 
@@ -112,10 +113,10 @@ export default function Footer() {
 
           <h3>Help</h3>
 
-          <a href="/shipping">Shipping & Returns</a>
-          <a href="/faq">FAQ</a>
-          <a href="/privacy">Privacy</a>
-          <a href="/terms">Terms</a>
+          <Link href="/shipping">Shipping & Returns</Link>
+          <Link href="/faq">FAQ</Link>
+          <Link href="/privacy">Privacy</Link>
+          <Link href="/terms">Terms</Link>
 
         </div>
 

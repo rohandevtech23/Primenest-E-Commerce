@@ -137,11 +137,8 @@ VALUES
     ('Men', 'men'),
     ('Women', 'women'),
     ('Accessories', 'accessories'),
-    ('Home Essentials', 'home-essentials'),
     ('Footwear', 'footwear'),
-    ('Perfume', 'perfume'),
-    ('Kids', 'kids'),
-    ('Beauty', 'beauty')
+    ('Perfume', 'perfume')
 ON CONFLICT (slug) DO NOTHING;
 
 -- ------------------------------------------------------------------------------
@@ -152,21 +149,15 @@ DECLARE
     cat_men INT;
     cat_women INT;
     cat_acc INT;
-    cat_home INT;
     cat_footwear INT;
     cat_perfume INT;
-    cat_kids INT;
-    cat_beauty INT;
     p_id INT;
 BEGIN
     SELECT id INTO cat_men FROM categories WHERE slug = 'men';
     SELECT id INTO cat_women FROM categories WHERE slug = 'women';
     SELECT id INTO cat_acc FROM categories WHERE slug = 'accessories';
-    SELECT id INTO cat_home FROM categories WHERE slug = 'home-essentials';
     SELECT id INTO cat_footwear FROM categories WHERE slug = 'footwear';
     SELECT id INTO cat_perfume FROM categories WHERE slug = 'perfume';
-    SELECT id INTO cat_kids FROM categories WHERE slug = 'kids';
-    SELECT id INTO cat_beauty FROM categories WHERE slug = 'beauty';
 
     -- 1. Essential Oxford Shirt
     IF NOT EXISTS (SELECT 1 FROM products WHERE slug = 'essential-oxford-shirt') THEN

@@ -1,0 +1,843 @@
+/* =========================================================================
+   PRIME NEST - ULTRA LUXURY FLOATING NAVBAR & HAUTE-COUTURE MEGA MENU
+   ========================================================================= */
+
+/* -------------------------------------------------------------------------
+   1. MAIN NAVBAR CONTAINER
+   ------------------------------------------------------------------------- */
+.navbar {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 76px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 0 4% !important;
+  box-sizing: border-box !important;
+  z-index: 1000 !important;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* Glassmorphism background for home & inner pages */
+.navbar-home,
+.navbar-inner {
+  background: rgba(15, 15, 15, 0.82) !important;
+  backdrop-filter: blur(20px) saturate(180%) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25) !important;
+}
+
+/* Scrolled state: deeper onyx with hairline gold shimmer */
+.navbar-scrolled {
+  background: rgba(10, 10, 10, 0.94) !important;
+  backdrop-filter: blur(28px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(200%) !important;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.22) !important;
+  box-shadow: 0 16px 40px -10px rgba(0, 0, 0, 0.6) !important;
+  height: 72px !important;
+}
+
+/* -------------------------------------------------------------------------
+   2. BRAND LOGO
+   ------------------------------------------------------------------------- */
+.navbar .navbar-brand {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  text-decoration: none !important;
+  flex: 0 0 auto !important;
+  margin-right: 32px !important;
+  position: static !important;
+  transform: none !important;
+}
+
+.navbar .navbar-logo {
+  height: 42px !important;
+  width: auto !important;
+  object-fit: contain !important;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  filter: drop-shadow(0 2px 8px rgba(212, 175, 55, 0.25)) !important;
+}
+
+.navbar .navbar-brand:hover .navbar-logo {
+  transform: scale(1.05) !important;
+}
+
+/* -------------------------------------------------------------------------
+   3. NAVIGATION CATEGORIES BAR
+   ------------------------------------------------------------------------- */
+.navbar .nav-links {
+  display: flex !important;
+  align-items: center !important;
+  gap: 26px !important;
+  flex: 1 1 auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  list-style: none !important;
+}
+
+.navbar .nav-item {
+  position: static !important; /* Allows mega menu to center relative to entire navbar */
+  height: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.navbar .nav-button {
+  background: transparent !important;
+  border: none !important;
+  color: #e5e5e5 !important;
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif !important;
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+  letter-spacing: 1.8px !important;
+  text-transform: uppercase !important;
+  padding: 10px 4px !important;
+  cursor: pointer !important;
+  position: relative !important;
+  transition: color 0.3s ease !important;
+  white-space: nowrap !important;
+}
+
+.navbar .nav-button::after {
+  content: "" !important;
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 50% !important;
+  transform: translateX(-50%) scaleX(0) !important;
+  width: 100% !important;
+  height: 2px !important;
+  background: linear-gradient(90deg, #b89146, #e7c875, #b89146) !important;
+  border-radius: 2px !important;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  transform-origin: center !important;
+}
+
+.navbar .nav-button:hover,
+.navbar .nav-button.active {
+  color: #e7c875 !important;
+}
+
+.navbar .nav-button:hover::after,
+.navbar .nav-button.active::after {
+  transform: translateX(-50%) scaleX(1) !important;
+}
+
+/* -------------------------------------------------------------------------
+   4. HAUTE-COUTURE MEGA MENU PANEL (CENTERED, FULL LUXURY)
+   ------------------------------------------------------------------------- */
+.luxury-megamenu-panel {
+  position: absolute !important;
+  top: 100% !important;
+  left: 160px; /* Fallback default aligns directly near MEN */
+  width: fit-content !important;
+  min-width: 580px !important;
+  max-width: min(1180px, 95vw) !important;
+  max-height: calc(100vh - 88px) !important;
+  overflow-y: auto !important;
+  box-sizing: border-box !important;
+  margin-top: 0 !important;
+  padding: 28px 34px 20px !important;
+  
+  background: rgba(14, 14, 14, 0.97) !important;
+  backdrop-filter: blur(32px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(200%) !important;
+  
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-top: 2px solid #c8a355 !important;
+  border-radius: 0 0 16px 16px !important;
+  
+  box-shadow: 
+    0 32px 80px -15px rgba(0, 0, 0, 0.8),
+    0 0 0 1px rgba(255, 255, 255, 0.04),
+    0 1px 40px rgba(200, 163, 85, 0.1) !important;
+  
+  z-index: 9999 !important;
+  animation: megaMenuSlideDown 0.24s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+/* Invisible bridge so cursor never drops when traveling down from navbar items */
+.luxury-megamenu-panel::before {
+  content: "" !important;
+  position: absolute !important;
+  top: -24px !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 28px !important;
+  background: transparent !important;
+  z-index: 10 !important;
+}
+
+@keyframes megaMenuSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.megamenu-inner-grid {
+  display: flex !important;
+  align-items: stretch !important;
+  justify-content: space-between !important;
+  gap: 48px !important;
+}
+
+.megamenu-columns-wrap {
+  display: flex !important;
+  gap: 44px !important;
+  align-items: flex-start !important;
+  flex: 0 0 auto !important;
+}
+
+.megamenu-col {
+  display: flex !important;
+  flex-direction: column !important;
+  min-width: 180px !important;
+  max-width: 220px !important;
+  flex: 0 0 auto !important;
+}
+
+.megamenu-heading {
+  margin: 0 0 14px !important;
+  padding-bottom: 8px !important;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.35) !important;
+  color: #f3d78c !important;
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 2px !important;
+  text-transform: uppercase !important;
+}
+
+.megamenu-list {
+  list-style: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 2px !important;
+}
+
+.megamenu-item-link {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 7px 10px !important;
+  border-radius: 8px !important;
+  color: #ded9d1 !important;
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif !important;
+  text-decoration: none !important;
+  transition: all 0.2s ease !important;
+  background: transparent !important;
+}
+
+.megamenu-sublink-title {
+  color: #ded9d1 !important;
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif !important;
+  font-size: 13.5px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.2px !important;
+  line-height: 1.35 !important;
+  margin: 0 !important;
+  transition: all 0.2s ease !important;
+}
+
+.megamenu-item-arrow {
+  opacity: 0 !important;
+  transform: translateX(-4px) !important;
+  color: #e7c875 !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  line-height: 1 !important;
+  transition: all 0.2s ease !important;
+}
+
+.megamenu-item-link:hover {
+  color: #ffffff !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  padding-left: 14px !important;
+  transform: translateX(3px) !important;
+}
+
+.megamenu-item-link:hover .megamenu-sublink-title {
+  color: #ffffff !important;
+  font-weight: 600 !important;
+}
+
+.megamenu-item-link:hover .megamenu-item-arrow {
+  opacity: 1 !important;
+  transform: translateX(0) !important;
+}
+
+/* -------------------------------------------------------------------------
+   5. MEGA MENU FEATURED EDITORIAL CARD & SLIDER (2-3 IMAGES CAROUSEL)
+   ------------------------------------------------------------------------- */
+.megamenu-featured-card {
+  position: relative !important;
+  width: 360px !important;
+  min-height: 310px !important;
+  border-radius: 14px !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.5) !important;
+  flex: 0 0 360px !important;
+  background: #111111 !important;
+}
+
+.featured-slides-container {
+  position: relative !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 310px !important;
+}
+
+.featured-slide {
+  position: absolute !important;
+  inset: 0 !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1), transform 0.55s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  transform: scale(1.03) !important;
+}
+
+.featured-slide.active {
+  opacity: 1 !important;
+  visibility: visible !important;
+  transform: scale(1) !important;
+  z-index: 2 !important;
+}
+
+.featured-card-bg {
+  position: absolute !important;
+  inset: 0 !important;
+  background-size: cover !important;
+  background-position: center !important;
+  transition: transform 0.8s ease !important;
+}
+
+.megamenu-featured-card:hover .featured-slide.active .featured-card-bg {
+  transform: scale(1.06) !important;
+}
+
+.featured-card-overlay {
+  position: absolute !important;
+  inset: 0 !important;
+  background: linear-gradient(
+    180deg,
+    rgba(10, 10, 10, 0.2) 0%,
+    rgba(10, 10, 10, 0.72) 55%,
+    rgba(10, 10, 10, 0.96) 100%
+  ) !important;
+}
+
+.featured-card-content {
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  padding: 22px 24px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  z-index: 3 !important;
+}
+
+.featured-card-tag {
+  display: inline-flex !important;
+  align-items: center !important;
+  color: #e7c875 !important;
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: 2px !important;
+  text-transform: uppercase !important;
+}
+
+.featured-card-title {
+  margin: 0 !important;
+  color: #ffffff !important;
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  line-height: 1.25 !important;
+  letter-spacing: -0.3px !important;
+}
+
+.featured-card-sub {
+  margin: 0 !important;
+  color: #b0aba3 !important;
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif !important;
+  font-size: 12px !important;
+  line-height: 1.4 !important;
+}
+
+.featured-card-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  margin-top: 6px !important;
+  padding: 8px 16px !important;
+  width: fit-content !important;
+  border-radius: 999px !important;
+  background: #ffffff !important;
+  color: #121212 !important;
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 1px !important;
+  text-transform: uppercase !important;
+  text-decoration: none !important;
+  transition: all 0.3s ease !important;
+}
+
+.featured-card-btn:hover {
+  background: #c8a355 !important;
+  color: #ffffff !important;
+  transform: translateX(4px) !important;
+}
+
+/* Slider Controls (Next / Prev Arrows) */
+.slider-arrow-btn {
+  position: absolute !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 50% !important;
+  background: rgba(14, 14, 14, 0.7) !important;
+  backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.22) !important;
+  color: #ffffff !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+  z-index: 5 !important;
+  opacity: 0 !important;
+  transition: all 0.25s ease !important;
+}
+
+.slider-arrow-btn.prev {
+  left: 10px !important;
+}
+
+.slider-arrow-btn.next {
+  right: 10px !important;
+}
+
+.megamenu-featured-card:hover .slider-arrow-btn {
+  opacity: 1 !important;
+}
+
+.slider-arrow-btn:hover {
+  background: #c8a355 !important;
+  color: #121212 !important;
+  transform: translateY(-50%) scale(1.1) !important;
+}
+
+/* Slider Navigation Indicators (Top Right Luxury Dots) */
+.featured-slider-dots {
+  position: absolute !important;
+  top: 14px !important;
+  right: 16px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  z-index: 5 !important;
+}
+
+.slider-dot {
+  width: 6px !important;
+  height: 6px !important;
+  border-radius: 999px !important;
+  background: rgba(255, 255, 255, 0.4) !important;
+  border: none !important;
+  padding: 0 !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+}
+
+.slider-dot.active {
+  width: 22px !important;
+  background: #e7c875 !important;
+  box-shadow: 0 0 10px rgba(231, 200, 117, 0.6) !important;
+}
+
+/* -------------------------------------------------------------------------
+   6. MEGA MENU BOTTOM BAR
+   ------------------------------------------------------------------------- */
+.megamenu-bottom-bar {
+  margin-top: 20px !important;
+  padding-top: 14px !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 16px !important;
+}
+
+.megamenu-view-all-link {
+  color: #f0d593 !important;
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.12), rgba(255, 255, 255, 0.03)) !important;
+  border: 1px solid rgba(212, 175, 55, 0.35) !important;
+  border-radius: 999px !important;
+  padding: 8px 18px !important;
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 1.8px !important;
+  text-transform: uppercase !important;
+  text-decoration: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.megamenu-view-all-link:hover {
+  color: #ffffff !important;
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.28), rgba(212, 175, 55, 0.12)) !important;
+  border-color: #f3d78c !important;
+  box-shadow: 0 4px 18px rgba(212, 175, 55, 0.25) !important;
+  transform: translateX(4px) !important;
+}
+
+/* -------------------------------------------------------------------------
+   7. NAVBAR SEARCH BAR (LUXURY GLASS PILL)
+   ------------------------------------------------------------------------- */
+.navbar .navbar-actions {
+  display: flex !important;
+  align-items: center !important;
+  gap: 20px !important;
+  flex: 0 0 auto !important;
+}
+
+.navbar .navbar-search-wrapper {
+  position: relative !important;
+  width: 290px !important;
+  transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.navbar .navbar-search-wrapper:focus-within {
+  width: 340px !important;
+}
+
+.navbar .navbar-search-bar {
+  display: flex !important;
+  align-items: center !important;
+  width: 100% !important;
+  height: 40px !important;
+  background: rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.16) !important;
+  border-radius: 999px !important;
+  padding: 0 14px !important;
+  box-sizing: border-box !important;
+  transition: all 0.3s ease !important;
+}
+
+.navbar .navbar-search-bar:focus-within {
+  background: rgba(255, 255, 255, 0.14) !important;
+  border-color: #c8a355 !important;
+  box-shadow: 0 0 0 3px rgba(200, 163, 85, 0.2) !important;
+}
+
+.navbar .search-submit {
+  background: transparent !important;
+  border: none !important;
+  color: #e7c875 !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 0 !important;
+  margin-right: 10px !important;
+  cursor: pointer !important;
+}
+
+.navbar .navbar-search-bar input {
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  color: #ffffff !important;
+  font-family: var(--font-jakarta), "Plus Jakarta Sans", sans-serif !important;
+  font-size: 12.5px !important;
+  font-weight: 400 !important;
+  width: 100% !important;
+}
+
+.navbar .navbar-search-bar input::placeholder {
+  color: #a39e95 !important;
+  font-size: 12px !important;
+}
+
+.navbar .search-clear {
+  background: transparent !important;
+  border: none !important;
+  color: #a39e95 !important;
+  cursor: pointer !important;
+  display: grid !important;
+  place-items: center !important;
+  padding: 0 !important;
+  transition: color 0.2s ease !important;
+}
+
+.navbar .search-clear:hover {
+  color: #ffffff !important;
+}
+
+/* Live Search Suggestions Popover */
+.navbar-search-results {
+  position: absolute !important;
+  top: calc(100% + 10px) !important;
+  right: 0 !important;
+  width: 380px !important;
+  background: rgba(14, 14, 14, 0.96) !important;
+  backdrop-filter: blur(28px) !important;
+  -webkit-backdrop-filter: blur(28px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  border-top: 2px solid #c8a355 !important;
+  border-radius: 14px !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6) !important;
+  padding: 16px !important;
+  z-index: 10001 !important;
+  animation: searchFadeIn 0.25s ease-out !important;
+}
+
+@keyframes searchFadeIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.search-results-heading {
+  color: #c8a355 !important;
+  font-family: var(--font-jakarta), sans-serif !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: 2px !important;
+  margin-bottom: 12px !important;
+  text-transform: uppercase !important;
+}
+
+.search-result-item {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  width: 100% !important;
+  padding: 8px !important;
+  border-radius: 8px !important;
+  background: transparent !important;
+  border: none !important;
+  cursor: pointer !important;
+  text-align: left !important;
+  transition: background 0.2s ease !important;
+}
+
+.search-result-item:hover {
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+
+.search-result-item img,
+.search-result-placeholder {
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 6px !important;
+  object-fit: cover !important;
+  background: #222 !important;
+  display: grid !important;
+  place-items: center !important;
+  color: #777 !important;
+}
+
+.search-result-info {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 2px !important;
+  min-width: 0 !important;
+}
+
+.search-result-info strong {
+  color: #ffffff !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+.search-result-info small {
+  color: #999 !important;
+  font-size: 11px !important;
+}
+
+.search-result-info b {
+  color: #c8a355 !important;
+  font-size: 12.5px !important;
+  font-weight: 700 !important;
+}
+
+/* -------------------------------------------------------------------------
+   8. ACTION BUTTONS (BAG, WISHLIST, ACCOUNT)
+   ------------------------------------------------------------------------- */
+.navbar .bag-icon,
+.navbar .wishlist-icon,
+.navbar .profile-trigger {
+  position: relative !important;
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  display: grid !important;
+  place-items: center !important;
+  color: #ffffff !important;
+  text-decoration: none !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+}
+
+.navbar .bag-icon:hover,
+.navbar .wishlist-icon:hover,
+.navbar .profile-trigger:hover {
+  background: rgba(255, 255, 255, 0.14) !important;
+  border-color: #c8a355 !important;
+  color: #c8a355 !important;
+  transform: scale(1.08) !important;
+}
+
+/* Badge counters */
+.navbar .cart-count,
+.navbar .wishlist-count {
+  position: absolute !important;
+  top: -4px !important;
+  right: -4px !important;
+  min-width: 18px !important;
+  height: 18px !important;
+  padding: 0 4px !important;
+  border-radius: 999px !important;
+  background: #c8a355 !important;
+  color: #121212 !important;
+  font-family: var(--font-jakarta), sans-serif !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+}
+
+.navbar .wishlist-count {
+  background: #e11d48 !important;
+  color: #ffffff !important;
+}
+
+/* Profile Dropdown Popover */
+.profile-dropdown-wrapper {
+  position: relative !important;
+}
+
+.profile-dropdown {
+  position: absolute !important;
+  top: calc(100% + 12px) !important;
+  right: 0 !important;
+  width: 200px !important;
+  background: #111318 !important;
+  backdrop-filter: blur(28px) !important;
+  -webkit-backdrop-filter: blur(28px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-top: 2px solid #c8a355 !important;
+  border-radius: 12px !important;
+  padding: 6px !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6) !important;
+  z-index: 10001 !important;
+  animation: searchFadeIn 0.2s ease-out !important;
+}
+
+.profile-dropdown-link {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 8px 12px !important;
+  color: #f3f4f6 !important;
+  font-family: var(--font-jakarta), sans-serif !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+  border-radius: 8px !important;
+  background: transparent !important;
+  border: none !important;
+  width: 100% !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+.profile-dropdown-link svg {
+  color: #c8a355 !important;
+  stroke: #c8a355 !important;
+  flex-shrink: 0 !important;
+}
+
+.profile-dropdown-link span {
+  color: inherit !important;
+}
+
+.profile-dropdown-link:hover {
+  background: rgba(200, 163, 85, 0.14) !important;
+  color: #fbbf24 !important;
+}
+
+.profile-dropdown-link.profile-logout {
+  color: #fca5a5 !important;
+}
+
+.profile-dropdown-link.profile-logout svg {
+  color: #f87171 !important;
+  stroke: #f87171 !important;
+}
+
+.profile-dropdown-link.profile-logout:hover {
+  color: #ffffff !important;
+  background: rgba(239, 68, 68, 0.18) !important;
+}
+
+/* -------------------------------------------------------------------------
+   9. RESPONSIVE QUERIES
+   ------------------------------------------------------------------------- */
+@media (max-width: 1200px) {
+  .luxury-megamenu-panel {
+    width: 96vw !important;
+    padding: 28px 28px 20px !important;
+  }
+
+  .megamenu-inner-grid {
+    grid-template-columns: 1fr 280px !important;
+    gap: 28px !important;
+  }
+
+  .navbar .nav-links {
+    gap: 16px !important;
+  }
+}
+
+@media (max-width: 960px) {
+  .megamenu-inner-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .megamenu-featured-card {
+    display: none !important;
+  }
+
+  .navbar .navbar-search-wrapper {
+    width: 200px !important;
+  }
+
+  .navbar .navbar-search-wrapper:focus-within {
+    width: 240px !important;
+  }
+}

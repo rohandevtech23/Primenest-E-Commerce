@@ -39,6 +39,10 @@ import {
   Smartphone,
   CheckCircle2,
   ArrowDown,
+  Laptop,
+  Droplets,
+  RotateCcw,
+  Briefcase,
 } from "lucide-react";
 import { toast } from "sonner";
 // import VirtualTryOnModal from "@/components/VirtualTryOnModal"; // Temporarily disabled: Virtual Try-On
@@ -54,12 +58,13 @@ export default function ProductPage({ params }) {
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
-  const [selectedVariant, setSelectedVariant] = useState("UK 9");
-  const [selectedColor, setSelectedColor] = useState("Grey White");
+  const [selectedVariant, setSelectedVariant] = useState("L");
+  const [selectedColor, setSelectedColor] = useState("Default");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [addedRecently, setAddedRecently] = useState(false);
   // const [isTryOnOpen, setIsTryOnOpen] = useState(false); // Temporarily disabled: Virtual Try-On
+  const [isDescExpanded, setIsDescExpanded] = useState(false);
   const [showSizeGuide, setShowSizeGuide] = useState(false);
   const [isFullscreenOpen, setIsFullscreenOpen] = useState(false);
   const [is360Active, setIs360Active] = useState(false);
@@ -73,26 +78,151 @@ export default function ProductPage({ params }) {
   const mainStageRef = useRef(null);
   const chatStreamRef = useRef(null);
 
+  // Precise Category detection
+  const subLower = (product?.subcategory || "").toLowerCase();
+  const nameLower = (product?.name || "").toLowerCase();
+  const catLower = (product?.category || "").toLowerCase();
+
+  const isFootwear = Boolean(
+    catLower === "footwear" ||
+    subLower.includes("shoes") ||
+    subLower.includes("sneaker") ||
+    subLower.includes("footwear") ||
+    nameLower.includes("sneaker") ||
+    nameLower.includes("shoe")
+  );
+
+  const isBagOrAccessory = Boolean(
+    catLower === "accessories" ||
+    subLower.includes("bag") ||
+    subLower.includes("backpack") ||
+    subLower.includes("handbag") ||
+    subLower.includes("tote") ||
+    subLower.includes("wallet") ||
+    subLower.includes("watch") ||
+    subLower.includes("cap") ||
+    subLower.includes("sunglass") ||
+    nameLower.includes("backpack") ||
+    nameLower.includes("bag") ||
+    nameLower.includes("pack") ||
+    nameLower.includes("wallet") ||
+    nameLower.includes("watch")
+  );
+
+  const isPerfume = Boolean(
+    catLower === "perfume" ||
+    subLower.includes("perfume") ||
+    subLower.includes("fragrance") ||
+    nameLower.includes("perfume") ||
+    nameLower.includes("flacon")
+  );
+
+  const isClothing = !isFootwear && !isBagOrAccessory && !isPerfume;
+  const hasSizeSelection = !isBagOrAccessory && !isPerfume && (isClothing || isFootwear);
+
   // Dynamic comparison options from store catalog
-  const compareOptions = useMemo(
-    () => [
+  const compareOptions = useMemo(() => {
+    if (Array.isArray(relatedProducts) && relatedProducts.length > 0) {
+      return relatedProducts.slice(0, 5).map((p) => ({
+        id: p.id,
+        name: p.name.length > 28 ? p.name.slice(0, 27) + "..." : p.name,
+        price: typeof p.price === "number" ? `₹${p.price.toLocaleString("en-IN")}` : `₹${p.price}`,
+      }));
+    }
+
+    if (isBagOrAccessory) {
+      return [
+        { name: "Demon Slayer: Tanjiro Pack", price: "₹2,799" },
+        { name: "Punisher Tactical Gear", price: "₹3,299" },
+        { name: "Black Panther Tactical Pack", price: "₹3,499" },
+      ];
+    }
+
+    if (isPerfume) {
+      return [
+        { name: "House Of The Dragon Extrait", price: "₹4,999" },
+        { name: "Sea & Cedar Coastal Noir", price: "₹3,899" },
+        { name: "Cosmic Trilogy Set", price: "₹7,499" },
+      ];
+    }
+
+    if (isClothing) {
+      return [
+        { name: "White Regular Fit Crew Tee", price: "₹999" },
+        { name: "Men Red Relaxed Fit Tee", price: "₹1,499" },
+        { name: "Men White Relaxed Fit Tee", price: "₹1,299" },
+        { name: "Men Grey Regular Fit Tee", price: "₹999" },
+      ];
+    }
+
+    return [
       { name: "Puma Palermo", price: "₹6,299" },
       { name: "Nike Court Vision", price: "₹5,999" },
       { name: "Air Jordan 1 High", price: "₹9,500" },
-    ],
-    []
-  );
+    ];
+  }, [relatedProducts, isBagOrAccessory, isPerfume, isClothing]);
+
   const [compareIndex, setCompareIndex] = useState(0);
-  const currentCompareOption = compareOptions[compareIndex];
+  const currentCompareOption =
+    compareOptions[compareIndex % (compareOptions.length || 1)] || compareOptions[0];
+
+  // Dynamic Category-Specific Quick Prompt Chips
+  const quickPromptChips = useMemo(() => {
+    if (isBagOrAccessory) {
+      return [
+        { label: "Is this good for daily use?", icon: Clock, query: "Is this good for daily use?" },
+        { label: "What is the laptop capacity?", icon: Laptop, query: "What is the laptop capacity?" },
+        { label: "Is it water resistant?", icon: Droplets, query: "Is it water resistant?" },
+        { label: "Show similar bags & packs", icon: Sparkles, query: "Show similar bags & packs" },
+        { label: "Show cheaper options", icon: Tag, query: "Show cheaper options" },
+      ];
+    }
+    if (isFootwear) {
+      return [
+        { label: "Is this good for daily walking?", icon: Clock, query: "Is this good for daily walking?" },
+        { label: "Is the sizing true to size?", icon: CheckCircle2, query: "Is the sizing true to size?" },
+        { label: "Sneaker care & cleaning tips", icon: ShieldCheck, query: "Sneaker care & cleaning tips" },
+        { label: "Show similar sneakers", icon: Sparkles, query: "Show similar sneakers" },
+        { label: "Show cheaper options", icon: Tag, query: "Show cheaper options" },
+      ];
+    }
+    if (isPerfume) {
+      return [
+        { label: "What are the fragrance notes?", icon: Sparkles, query: "What are the fragrance notes?" },
+        { label: "How long does the scent last?", icon: Clock, query: "How long does the scent last?" },
+        { label: "Best for day or evening wear?", icon: Flame, query: "Best for day or evening wear?" },
+        { label: "Show similar fragrances", icon: Sparkles, query: "Show similar fragrances" },
+        { label: "Show cheaper options", icon: Tag, query: "Show cheaper options" },
+      ];
+    }
+    return [
+      { label: "Is this good for daily wear?", icon: Clock, query: "Is this good for daily wear?" },
+      { label: "How is the fit & fabric?", icon: Shirt, query: "How is the fit & fabric?" },
+      { label: "Can I wear this with jeans?", icon: Sparkles, query: "Can I wear this with jeans?" },
+      { label: "Show similar tees & shirts", icon: Sparkles, query: "Show similar tees & shirts" },
+      { label: "Show cheaper options", icon: Tag, query: "Show cheaper options" },
+    ];
+  }, [isBagOrAccessory, isFootwear, isPerfume]);
 
   // AI Stylist chat conversation inside the right column panel
   const [aiChatMessages, setAiChatMessages] = useState([
     {
       id: "init",
       sender: "ai",
-      text: "Hi! 👋 I can help you find similar shoes, suggest outfits, compare products, or answer any questions about this sneaker.",
+      text: "Hi! 👋 I'm your PrimeNest AI Concierge. I can help answer questions about this piece, check dimensions & materials, suggest styling options, or compare catalog items.",
     },
   ]);
+
+  const handleResetAiChat = () => {
+    setAiChatMessages([
+      {
+        id: `init-${Date.now()}`,
+        sender: "ai",
+        text: `Hi! 👋 I'm your PrimeNest AI Concierge for ${product?.name || "this piece"}. I can assist with dimensions, material specs, styling recommendations, or compare with other catalog pieces.`,
+      },
+    ]);
+    setInPageQuery("");
+  };
 
   // Color Swatches
   const colorSwatches = [
@@ -110,6 +240,7 @@ export default function ProductPage({ params }) {
         setError("");
         setSelectedImageIndex(0);
         setQuantity(1);
+        setIsDescExpanded(false);
 
         const response = await fetch(`/api/products/${id}`);
 
@@ -125,12 +256,21 @@ export default function ProductPage({ params }) {
         setProduct(data.product);
         setRelatedProducts(data.relatedProducts || []);
 
-        // Default to UK 9 if available, else first variant
+        // Default variant selection based on product category (L for clothing, UK 9 for footwear)
+        const sub = (data.product?.subcategory || "").toLowerCase();
+        const cat = (data.product?.category || "").toLowerCase();
+        const nm = (data.product?.name || "").toLowerCase();
+        const isFoot = cat === "footwear" || sub.includes("shoes") || sub.includes("sneaker") || nm.includes("sneaker");
+        const isCloth = !isFoot && (cat === "men" || cat === "women" || cat === "kids" || sub.includes("shirt") || sub.includes("t-shirt") || sub.includes("polo") || nm.includes("shirt") || nm.includes("t-shirt"));
+        const targetDefault = isCloth ? "L" : "UK 9";
+
         if (Array.isArray(data.product?.variants) && data.product.variants.length > 0) {
-          const hasUK9 = data.product.variants.some(
-            (v) => (v.label || v) === "UK 9"
+          const hasTarget = data.product.variants.some(
+            (v) => (v.label || v) === targetDefault
           );
-          setSelectedVariant(hasUK9 ? "UK 9" : data.product.variants[0].label || data.product.variants[0]);
+          setSelectedVariant(hasTarget ? targetDefault : data.product.variants[0].label || data.product.variants[0]);
+        } else {
+          setSelectedVariant(targetDefault);
         }
       } catch (err) {
         setError(err.message);
@@ -192,14 +332,17 @@ export default function ProductPage({ params }) {
       maximumFractionDigits: 2,
     });
 
-  // Category detection
-  const isFootwear =
-    product?.category === "Footwear" ||
-    (product?.subcategory && product.subcategory.toLowerCase().includes("shoes")) ||
-    (product?.subcategory && product.subcategory.toLowerCase().includes("sneaker")) ||
-    (product?.subcategory && product.subcategory.toLowerCase().includes("footwear"));
+  // Default clothing size options: XS, S, M, L, XL, XXL
+  const defaultClothingSizes = [
+    { label: "XS", stock: 8 },
+    { label: "S", stock: 15 },
+    { label: "M", stock: 20 },
+    { label: "L", stock: 18 },
+    { label: "XL", stock: 12 },
+    { label: "XXL", stock: 6 },
+  ];
 
-  // Default fallback variants
+  // Default shoe size options: UK 6 to UK 11
   const defaultShoeSizes = [
     { label: "UK 6", stock: 12 },
     { label: "UK 7", stock: 15 },
@@ -212,9 +355,13 @@ export default function ProductPage({ params }) {
   const rawVariants =
     Array.isArray(product?.variants) && product.variants.length > 0
       ? product.variants
+      : isClothing
+      ? defaultClothingSizes
       : isFootwear
       ? defaultShoeSizes
-      : [];
+      : defaultClothingSizes;
+
+  const recommendedSize = isClothing ? "L" : "UK 9";
 
   const variants = rawVariants
     .map((variant) =>
@@ -299,7 +446,7 @@ export default function ProductPage({ params }) {
   // Cart operations
   const handleAddToCart = () => {
     if (hasVariants && !activeVariant) {
-      toast.error("Please select your shoe size before adding to bag.");
+      toast.error(isClothing ? "Please select your size before adding to bag." : "Please select your shoe size before adding to bag.");
       return;
     }
     if (quantity < 1 || quantity > availableStock) return;
@@ -308,7 +455,7 @@ export default function ProductPage({ params }) {
       ...product,
       selectedVariant: activeVariant || { label: selectedVariant },
       variantLabel: selectedVariant,
-      color: selectedColor,
+      color: isClothing ? undefined : selectedColor,
     };
 
     addToCart(cartProduct, quantity);
@@ -318,7 +465,7 @@ export default function ProductPage({ params }) {
 
   const handleBuyNow = () => {
     if (hasVariants && !activeVariant) {
-      toast.error("Please select your shoe size to proceed.");
+      toast.error(isClothing ? "Please select your size to proceed." : "Please select your shoe size to proceed.");
       return;
     }
     handleAddToCart();
@@ -366,12 +513,62 @@ export default function ProductPage({ params }) {
 
   // Complete outfit pieces definition
   const outfitPieces = useMemo(() => {
-    const shoeSizes =
+    const apparelSizes = ["XS", "S", "M", "L", "XL", "XXL"];
+    const shoeSizes = ["UK 6", "UK 7", "UK 8", "UK 9", "UK 10", "UK 11"];
+    const productSizes =
       Array.isArray(product?.variants) && product.variants.length > 0
         ? product.variants.map((v) =>
             typeof v === "object" ? v.label || v.size || v.name : String(v)
           )
-        : ["UK 6", "UK 7", "UK 8", "UK 9", "UK 10", "UK 11"];
+        : isClothing
+        ? apparelSizes
+        : shoeSizes;
+
+    if (isClothing) {
+      return [
+        {
+          key: "tee",
+          id: product?.id || 187,
+          name: product?.name || "Premium Cotton Tee",
+          category: product?.subcategory || "Apparel",
+          tag: "Core Top",
+          price: Number(product?.price) || 1299,
+          image:
+            currentImage ||
+            product?.images?.[0] ||
+            "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=800&q=80",
+          sizes: productSizes,
+          sizeType: "Size (Chest)",
+          desc: "100% breathable pure cotton jersey with comfortable relaxed drape",
+        },
+        {
+          key: "jeans",
+          id: 991,
+          name: "Vintage Washed Indigo Denim Jeans",
+          category: "Denim & Bottoms",
+          tag: "Relaxed Straight",
+          price: 2499,
+          image:
+            "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=400&q=80",
+          sizes: ["28", "30", "32", "34", "36", "38"],
+          sizeType: "Waist Size",
+          desc: "13.5oz ring-spun raw denim with authentic distressed vintage wash",
+        },
+        {
+          key: "shoe",
+          id: 104,
+          name: "Minimalist Low-Top Court Sneakers",
+          category: "Footwear",
+          tag: "Clean Court",
+          price: 3499,
+          image:
+            "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=400&q=80",
+          sizes: shoeSizes,
+          sizeType: "Shoe Size (UK)",
+          desc: "Sleek low-profile white sneakers designed for effortless daily styling",
+        },
+      ];
+    }
 
     return [
       {
@@ -385,7 +582,7 @@ export default function ProductPage({ params }) {
           currentImage ||
           product?.images?.[0] ||
           "https://images.unsplash.com/photo-1552346154-21d32810aba3?w=800&q=80",
-        sizes: shoeSizes,
+        sizes: productSizes,
         sizeType: "Shoe Size (UK)",
         desc: "Heritage low-top silhouette with responsive Nike Air heel cushioning",
       },
@@ -416,7 +613,7 @@ export default function ProductPage({ params }) {
         desc: "240 GSM drop-shoulder boxy cotton tee paired with structured 6-panel cap",
       },
     ];
-  }, [product, currentImage]);
+  }, [product, currentImage, isClothing]);
 
   // Pricing calculations with 10% Bundle Discount
   const outfitPricing = useMemo(() => {
@@ -520,7 +717,57 @@ export default function ProductPage({ params }) {
   // =========================================================================
   // CATALOG DATA FOR EACH TAB
   // =========================================================================
-  const aiRecommendedProducts = [
+  // Default apparel catalog products
+  const defaultApparelProducts = [
+    {
+      id: 141,
+      name: "White Regular Fit Crew-Neck Tee",
+      price: 999,
+      rating: 4.8,
+      image: "https://adn-static1.nykaa.com/nykdesignstudio-images/pub/media/catalog/product/b/8/b86c4e8685816001_1.jpg?rnd=20200526195200",
+      category: "Men",
+      badge: "98% AI Match",
+    },
+    {
+      id: 144,
+      name: "Men Red Relaxed Fit Printed Tee",
+      price: 1499,
+      rating: 4.7,
+      image: "https://adn-static1.nykaa.com/nykdesignstudio-images/pub/media/catalog/product/3/d/3dd0cc51344928012_1.jpg?rnd=20200526195200",
+      category: "Men",
+      badge: "96% AI Match",
+    },
+    {
+      id: 145,
+      name: "Men White Relaxed Fit Graphic Tee",
+      price: 1299,
+      rating: 4.6,
+      image: "https://adn-static1.nykaa.com/nykdesignstudio-images/pub/media/catalog/product/3/d/3dd0cc51344928011_1.jpg?rnd=20200526195200",
+      category: "Men",
+      badge: "95% AI Match",
+    },
+    {
+      id: 143,
+      name: "Men Grey Regular Fit Crew Tee",
+      price: 999,
+      rating: 4.5,
+      image: "https://adn-static1.nykaa.com/nykdesignstudio-images/pub/media/catalog/product/b/8/b86c4e8685816266_3.jpg?rnd=20200526195200",
+      category: "Men",
+      badge: "94% AI Match",
+    },
+    {
+      id: 187,
+      name: "Relaxed Fit Cotton Mustard Polo Tee",
+      price: 1499,
+      rating: 4.9,
+      image: "https://adn-static1.nykaa.com/nykdesignstudio-images/pub/media/catalog/product/6/a/6a7491563230569_1.jpg",
+      category: "Men",
+      badge: "Trending Pick",
+    },
+  ];
+
+  // Default footwear products
+  const defaultSneakerProducts = [
     {
       id: 104,
       name: "Nike Dunk Low",
@@ -566,178 +813,134 @@ export default function ProductPage({ params }) {
       category: "Footwear",
       badge: "93% AI Match",
     },
-    {
-      id: 108,
-      name: "Puma CA Pro",
-      price: 6499,
-      rating: 4.5,
-      image: "https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=600&q=80",
-      category: "Footwear",
-      badge: "94% AI Match",
-    },
   ];
 
-  const similarSneakerProducts = useMemo(() => {
-    const defaultSimilar = [
-      {
-        id: 104,
-        name: "Travis Scott x AJ1 Low",
-        price: 8200,
-        rating: 4.9,
-        image: "https://images.unsplash.com/photo-1552346154-21d32810aba3?w=600&q=80",
-        category: "Footwear",
-        badge: "Similar Silhouette",
-      },
-      {
-        id: 101,
-        name: "Air Jordan 1 High OG",
-        price: 9500,
-        rating: 4.9,
-        image: "https://i.pinimg.com/1200x/39/0e/d7/390ed756a6c663cd8f55457165cc7bf5.jpg",
-        category: "Footwear",
-        badge: "Jordan Heritage",
-      },
-      {
-        id: 103,
-        name: "Air Jordan 3 Retro",
-        price: 12500,
-        rating: 4.8,
-        image: "https://i.pinimg.com/736x/ac/dd/4a/acdd4adacb1d82d89ead17aaf03020e9.jpg",
-        category: "Footwear",
-        badge: "Classic Air",
-      },
-      {
-        id: 107,
-        name: "Nike Court Vision Low",
-        price: 5999,
-        rating: 4.4,
-        image: "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?w=600&q=80",
-        category: "Footwear",
-        badge: "Cheaper Option",
-      },
-      {
-        id: 105,
-        name: "Puma Palermo Leather",
-        price: 6299,
-        rating: 4.5,
-        image: "https://images.puma.com/image/upload/f_auto,q_auto,b_rgb:fafafa,w_750,h_750/global/402692/02/sv01/fnd/IND/fmt/png/Palermo-Leather-Sneakers",
-        category: "Footwear",
-        badge: "Similar Low-Top",
-      },
-      {
-        id: 115,
-        name: "Batman: Dark Knight 3.0",
-        price: 15699,
-        rating: 4.7,
-        image: "https://prod-img.thesouledstore.com/public/theSoul/uploads/catalog/product/1787831692_8900888.jpg?w=480&dpr=2",
-        category: "Footwear",
-        badge: "Limited Edition",
-      },
-    ];
+  const aiRecommendedProducts = useMemo(() => {
+    return isClothing ? defaultApparelProducts : defaultSneakerProducts;
+  }, [isClothing]);
+
+  const catalogSimilarProducts = useMemo(() => {
+    const fallbackList = isClothing ? defaultApparelProducts : defaultSneakerProducts;
 
     if (Array.isArray(relatedProducts) && relatedProducts.length > 0) {
       const dbMapped = relatedProducts.map((p) => {
-        let cleanName = p.name || "Sneaker";
-        if (cleanName.toLowerCase().includes("travis scott")) {
-          cleanName = "Travis Scott x AJ1 Low";
-        } else if (cleanName.length > 25) {
+        let cleanName = p.name || (isClothing ? "Cotton T-Shirt" : "Sneaker");
+        if (cleanName.length > 25) {
           cleanName = cleanName.slice(0, 24) + "...";
         }
 
         let cleanImage = p.image || p.image_url;
         if (!cleanImage || cleanImage.includes("sneakernews.com")) {
-          cleanImage = "https://images.unsplash.com/photo-1552346154-21d32810aba3?w=600&q=80";
+          cleanImage = isClothing
+            ? "https://adn-static1.nykaa.com/nykdesignstudio-images/pub/media/catalog/product/b/8/b86c4e8685816001_1.jpg?rnd=20200526195200"
+            : "https://images.unsplash.com/photo-1552346154-21d32810aba3?w=600&q=80";
         }
 
         return {
           id: p.id,
           name: cleanName,
-          price: Number(p.price) || 8200,
+          price: Number(p.price) || (isClothing ? 1299 : 8200),
           rating: 4.8,
           image: cleanImage,
-          category: p.category || "Footwear",
-          badge: "Similar Silhouette",
+          category: p.category || (isClothing ? "Men" : "Footwear"),
+          badge: isClothing ? "Similar Fit" : "Similar Silhouette",
         };
       });
-      const extra = defaultSimilar.filter(
+
+      const extra = fallbackList.filter(
         (s) => !dbMapped.some((d) => String(d.id) === String(s.id))
       );
       return [...dbMapped, ...extra].slice(0, 6);
     }
-    return defaultSimilar;
-  }, [relatedProducts]);
+    return fallbackList;
+  }, [relatedProducts, isClothing]);
 
-  const youMayAlsoLikeProducts = [
-    {
-      id: 991,
-      name: "Vintage Washed Indigo Denim Jeans",
-      price: 2499,
-      rating: 4.8,
-      image: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=600&q=80",
-      category: "Men",
-      badge: "Denim Pairing",
-    },
-    {
-      id: 992,
-      name: "Heavyweight Boxy Tee & Snapback Cap Set",
-      price: 1899,
-      rating: 4.7,
-      image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=600&q=80",
-      category: "Men",
-      badge: "Complete Look",
-    },
-    {
-      id: 993,
-      name: "Atelier French Terry Oversized Hoodie",
-      price: 3499,
-      rating: 4.9,
-      image: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=600&q=80",
-      category: "Men",
-      badge: "Streetwear",
-    },
-    {
-      id: 994,
-      name: "Minimalist Relaxed Utility Cargo Pants",
-      price: 2999,
-      rating: 4.6,
-      image: "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=600&q=80",
-      category: "Men",
-      badge: "Trending",
-    },
-    {
-      id: 995,
-      name: "PrimeNest Extrait de Parfum (100ml)",
-      price: 4200,
-      rating: 4.9,
-      image: "https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?w=600&q=80",
-      category: "Perfume",
-      badge: "Luxury Fragrance",
-    },
-    {
-      id: 996,
-      name: "Jordan Heritage Flight Bomber Jacket",
-      price: 6800,
-      rating: 4.8,
-      image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=600&q=80",
-      category: "Men",
-      badge: "Flight Collection",
-    },
-  ];
+  const youMayAlsoLikeProducts = useMemo(() => {
+    if (isClothing) {
+      return [
+        {
+          id: 991,
+          name: "Vintage Washed Indigo Denim Jeans",
+          price: 2499,
+          rating: 4.8,
+          image: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=600&q=80",
+          category: "Men",
+          badge: "Denim Pairing",
+        },
+        {
+          id: 994,
+          name: "Minimalist White Low-Tops",
+          price: 3499,
+          rating: 4.7,
+          image: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=600&q=80",
+          category: "Footwear",
+          badge: "Sneaker Pairing",
+        },
+        {
+          id: 993,
+          name: "Atelier French Terry Oversized Hoodie",
+          price: 3499,
+          rating: 4.9,
+          image: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=600&q=80",
+          category: "Men",
+          badge: "Layering Piece",
+        },
+        {
+          id: 995,
+          name: "Pleated Relaxed Cotton Trousers",
+          price: 2199,
+          rating: 4.6,
+          image: "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=600&q=80",
+          category: "Men",
+          badge: "Smart Casual",
+        },
+      ];
+    }
+    return [
+      {
+        id: 991,
+        name: "Vintage Washed Indigo Denim Jeans",
+        price: 2499,
+        rating: 4.8,
+        image: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=600&q=80",
+        category: "Men",
+        badge: "Denim Pairing",
+      },
+      {
+        id: 992,
+        name: "Heavyweight Boxy Fit Cotton Tee",
+        price: 1899,
+        rating: 4.7,
+        image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=600&q=80",
+        category: "Men",
+        badge: "Summer Essential",
+      },
+      {
+        id: 993,
+        name: "Atelier French Terry Oversized Hoodie",
+        price: 3499,
+        rating: 4.9,
+        image: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=600&q=80",
+        category: "Men",
+        badge: "Streetwear",
+      },
+    ];
+  }, [isClothing]);
 
   // Dynamic active tab product retriever
   const currentTabProducts = useMemo(() => {
     switch (activeBottomTab) {
       case "Similar Products":
-        return similarSneakerProducts;
+        return catalogSimilarProducts;
       case "You May Also Like":
         return youMayAlsoLikeProducts;
       case "Recently Viewed":
-        return recentlyViewedList.length > 0 ? recentlyViewedList : similarSneakerProducts;
+        return recentlyViewedList.length > 0 ? recentlyViewedList : catalogSimilarProducts;
       case "Recommended by AI":
       default:
         return aiRecommendedProducts;
     }
-  }, [activeBottomTab, similarSneakerProducts, recentlyViewedList]);
+  }, [activeBottomTab, catalogSimilarProducts, youMayAlsoLikeProducts, aiRecommendedProducts, recentlyViewedList]);
 
   // =========================================================================
   // AI STYLIST CHAT LOGIC (RESPONSIVE CHIPS & REAL AI REPLIES)
@@ -753,131 +956,136 @@ export default function ProductPage({ params }) {
 
     const lower = q.toLowerCase();
 
-    // 1. Similar sneakers query
-    if (lower.includes("similar") || lower.includes("alternative")) {
+    // 1. Laptop / Dimension / Capacity query
+    if (lower.includes("laptop") || lower.includes("capacity") || lower.includes("dimension")) {
       setTimeout(() => {
         setAiChatMessages((prev) => [
           ...prev,
           {
             id: `ai-${Date.now()}`,
             sender: "ai",
-            text: `Here are the top 3 similar sneakers for ${product?.name || "Air Jordan 1 Low"} based on silhouette, leather craftsmanship & street presence:`,
-            products: [
-              {
-                id: 104,
-                name: "Nike Dunk Low",
-                price: "₹8,499",
-                image: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=400&q=80",
-              },
-              {
-                id: 105,
-                name: "Puma Palermo",
-                price: "₹6,299",
-                image: "https://images.puma.com/image/upload/f_auto,q_auto,b_rgb:fafafa,w_750,h_750/global/402692/02/sv01/fnd/IND/fmt/png/Palermo-Leather-Sneakers",
-              },
-              {
-                id: 106,
-                name: "Adidas Campus 00s",
-                price: "₹7,999",
-                image: "https://images.unsplash.com/photo-1584735935682-2f2b69dff9d2?w=400&q=80",
-              },
-            ],
+            text: isBagOrAccessory
+              ? `💼 Laptop & Capacity Specifications:\n\n• Laptop Sleeve: Dedicated shock-absorbent padded compartment fits up to 16-inch laptops (MacBook Pro 16", Dell XPS 15/16, Lenovo ThinkPad).\n• Volume Capacity: Approximately 28L (49 cm H × 31 cm W × 18 cm D), weighing only 0.94 kg.\n• Compartments: Dual quick-access front tech zip organizers, side water bottle holder, and hidden passport security pocket.`
+              : isFootwear
+              ? `👟 Sizing & Fit:\n\n• Standard UK/IN sizing with a comfortable anatomical toe box.\n• Encapsulated cushioning provides superior all-day arch stability.`
+              : `👕 Size & Silhouette:\n\n• True-to-size relaxed silhouette with pre-shrunk pure cotton jersey fabric.`,
+          },
+        ]);
+        setAiTyping(false);
+      }, 500);
+      return;
+    }
+
+    // 2. Water Resistance / Weather query
+    if (lower.includes("water") || lower.includes("rain") || lower.includes("weather")) {
+      setTimeout(() => {
+        setAiChatMessages((prev) => [
+          ...prev,
+          {
+            id: `ai-${Date.now()}`,
+            sender: "ai",
+            text: isBagOrAccessory
+              ? `🌧️ Weather-Repellent Architecture:\n\n• Outer Fabric: Crafted from 1000D abrasion-resistant heavy-duty polyester with hydrophobic outer coating.\n• Interior: Fully lined with water-resistant polyester to protect electronics and books during sudden rain showers.\n• Zippers: Heavy-duty cord-pull closures with protective rain barrier flaps.`
+              : `🌧️ Weather Durability:\n\n• Crafted with weather-ready materials for all-season longevity.`,
+          },
+        ]);
+        setAiTyping(false);
+      }, 500);
+      return;
+    }
+
+    // 3. Similar items query
+    if (lower.includes("similar") || lower.includes("alternative") || lower.includes("tee") || lower.includes("pack") || lower.includes("bag")) {
+      setTimeout(() => {
+        const catalogItems = (relatedProducts && relatedProducts.length > 0 ? relatedProducts : defaultApparelProducts)
+          .slice(0, 3)
+          .map((p) => ({
+            id: p.id,
+            name: p.name.length > 25 ? p.name.slice(0, 24) + "..." : p.name,
+            price: typeof p.price === "number" ? `₹${p.price.toLocaleString("en-IN")}` : `₹${p.price}`,
+            image: p.image || p.image_url || "https://prod-img.thesouledstore.com/public/theSoul/uploads/catalog/product/1773818212_5017226.jpg?w=480&dpr=2",
+          }));
+
+        setAiChatMessages((prev) => [
+          ...prev,
+          {
+            id: `ai-${Date.now()}`,
+            sender: "ai",
+            text: isBagOrAccessory
+              ? `Here are 3 top-rated utility backpacks & gear pieces from the PrimeNest luxury catalog:`
+              : isClothing
+              ? `Here are 3 great similar t-shirts & shirts matching this fit and pure cotton fabric:`
+              : `Here are 3 similar footwear styles based on silhouette & street presence:`,
+            products: catalogItems,
             action: "view_similar_tab",
           },
         ]);
         setAiTyping(false);
-
-        // Switch bottom tab to 'Similar Products' in background without moving page
         setActiveBottomTab("Similar Products");
-      }, 550);
+      }, 500);
       return;
     }
 
-    // 2. Jeans query
-    if (lower.includes("jean") || lower.includes("denim") || lower.includes("pant")) {
+    // 4. Jeans / Styling query
+    if (lower.includes("jean") || lower.includes("denim") || lower.includes("pant") || lower.includes("wear")) {
       setTimeout(() => {
         setAiChatMessages((prev) => [
           ...prev,
           {
             id: `ai-${Date.now()}`,
             sender: "ai",
-            text: `✨ Denim Styling Guide for ${product?.name || "Air Jordan 1 Low"}:\n\n• Slim / Straight Dark Indigo: Clean, tailored, elevated look.\n• Washed Black Denim: High-contrast urban street aesthetic.\n• Relaxed Cargo Denim: On-trend 90s relaxed silhouette.`,
+            text: isBagOrAccessory
+              ? `✨ Styling & Commute Pairing:\n\n• Urban Streetwear: Pairs seamlessly with relaxed cargo trousers, hoodies, and sneakers.\n• Casual Denim: Looks assertive over dark raw denim and an overshirt.\n• College / Travel: Effortless over a bomber jacket and technical chinos.`
+              : isClothing
+              ? `✨ Denim Styling Guide for ${product?.name || "this tee"}:\n\n• Baggy / Wide-Leg Denim: Relaxed streetwear silhouette.\n• Slim / Straight Dark Indigo: Elevated smart-casual look.\n• Linen Trousers or Cargo Pants: Effortless weekend comfort.`
+              : `✨ Denim Styling Guide for ${product?.name || "Air Jordan 1 Low"}:\n\n• Slim / Straight Dark Indigo: Clean, tailored, elevated look.\n• Washed Black Denim: High-contrast urban street aesthetic.\n• Relaxed Cargo Denim: On-trend relaxed streetwear silhouette.`,
           },
         ]);
         setAiTyping(false);
-      }, 550);
+      }, 500);
       return;
     }
 
-    // 3. Cheaper options query
+    // 5. Cheaper options query
     if (lower.includes("cheap") || lower.includes("budget") || lower.includes("price") || lower.includes("under")) {
       setTimeout(() => {
+        const cheapItems = (relatedProducts && relatedProducts.length > 0
+          ? [...relatedProducts].sort((a, b) => Number(a.price) - Number(b.price))
+          : defaultApparelProducts
+        ).slice(0, 3).map((p) => ({
+          id: p.id,
+          name: p.name.length > 25 ? p.name.slice(0, 24) + "..." : p.name,
+          price: typeof p.price === "number" ? `₹${p.price.toLocaleString("en-IN")}` : `₹${p.price}`,
+          image: p.image || p.image_url || "https://prod-img.thesouledstore.com/public/theSoul/uploads/catalog/product/1773818212_5017226.jpg?w=480&dpr=2",
+        }));
+
         setAiChatMessages((prev) => [
           ...prev,
           {
             id: `ai-${Date.now()}`,
             sender: "ai",
-            text: `Here are great budget-friendly alternatives with the identical low-profile court silhouette:`,
-            products: [
-              {
-                id: 107,
-                name: "Nike Court Vision Low",
-                price: "₹5,999",
-                image: "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?w=400&q=80",
-              },
-              {
-                id: 105,
-                name: "Puma Palermo Sneakers",
-                price: "₹6,299",
-                image: "https://images.puma.com/image/upload/f_auto,q_auto,b_rgb:fafafa,w_750,h_750/global/402692/02/sv01/fnd/IND/fmt/png/Palermo-Leather-Sneakers",
-              },
-            ],
+            text: `Here are great budget-friendly pieces matching your style:`,
+            products: cheapItems,
             action: "view_similar_tab",
           },
         ]);
         setAiTyping(false);
         setActiveBottomTab("Similar Products");
-      }, 550);
+      }, 500);
       return;
     }
 
-    // 4. Compare with alternative products query
-    if (
-      lower.includes("compare") ||
-      lower.includes("vs") ||
-      lower.includes("palermo") ||
-      lower.includes("puma") ||
-      lower.includes("court") ||
-      lower.includes("vision") ||
-      lower.includes("high") ||
-      lower.includes("dunk")
-    ) {
-      let title = "";
+    // 6. Compare with alternative products query
+    if (lower.includes("compare") || lower.includes("vs")) {
+      let title = `⚖️ ${product?.name || "This Product"} vs ${currentCompareOption?.name || "Alternative Item"}:`;
       let details = "";
 
-      if (
-        lower.includes("palermo") ||
-        lower.includes("puma") ||
-        (lower.includes("compare") && currentCompareOption.name.includes("Palermo"))
-      ) {
-        title = `⚖️ ${product?.name || "Air Jordan 1 Low"} vs Puma Palermo Leather:`;
-        details = `• Vibe & Heritage: AJ1 Low delivers 1985 basketball court DNA; Puma Palermo brings 1980s Italian terrace football culture with a gum sole.\n• Upper Materials: AJ1 Low has smooth stitched leather; Palermo combines soft suede overlays with a signature T-toe design.\n• Cushioning: AJ1 features encapsulated Nike Air-Sole in the heel; Palermo uses a low-profile street EVA cupsole.\n• Price & Savings: AJ1 Low is ₹7,600 vs Puma Palermo at ₹6,299 (Puma saves you ₹1,301).`;
-      } else if (
-        lower.includes("court") ||
-        lower.includes("vision") ||
-        (lower.includes("compare") && currentCompareOption.name.includes("Court Vision"))
-      ) {
-        title = `⚖️ ${product?.name || "Air Jordan 1 Low"} vs Nike Court Vision Low:`;
-        details = `• Aesthetic: Near-identical 1980s low-top court look with clean Swoosh placement.\n• Materials: AJ1 uses premium full-grain leather; Court Vision uses durable synthetic eco-leather.\n• Sole & Comfort: AJ1 has encapsulated Air in the heel; Court Vision uses a standard durable rubber cupsole.\n• Price & Savings: AJ1 Low (₹7,600) vs Court Vision (₹5,999) — Court Vision gives you the iconic look while saving ₹1,601!`;
-      } else if (
-        lower.includes("high") ||
-        (lower.includes("compare") && currentCompareOption.name.includes("High"))
-      ) {
-        title = `⚖️ ${product?.name || "Air Jordan 1 Low"} vs Air Jordan 1 High OG:`;
-        details = `• Collar Profile: AJ1 Low offers full ankle mobility for everyday rotation; AJ1 High has the iconic 9-hole padded collar with Wings emblem.\n• Styling: Lows are effortless with shorts, cropped trousers, and warm-weather fits; Highs look best with loose/baggy streetwear denim.\n• Price: AJ1 Low is ₹7,600 vs AJ1 High at ₹9,500.`;
+      if (isBagOrAccessory) {
+        details = `• Architecture: Punisher Tactical features 28L capacity with 1000D abrasion-resistant exterior vs ${currentCompareOption?.name}.\n• Laptop Protection: Dedicated padded 16" tech sleeve with air-mesh spine ventilation.\n• Pricing: ${product?.name || "This bag"} (${formatPrice(product?.price)}) vs ${currentCompareOption?.name} (${currentCompareOption?.price || "₹2,799"}).`;
+      } else if (isClothing) {
+        details = `• Fabric & Feel: Premium breathable cotton jersey with reinforced stitching.\n• Fit: Standard relaxed luxury drape.\n• Value: ${product?.name || "This item"} (${formatPrice(product?.price)}) vs ${currentCompareOption?.name} (${currentCompareOption?.price || "₹1,299"}).`;
       } else {
-        title = `⚖️ ${product?.name || "Air Jordan 1 Low"} vs Nike Dunk Low:`;
-        details = `• Cushioning: AJ1 Low features encapsulated Nike Air-Sole heel cushioning; Dunk Low uses standard EVA foam.\n• Fit & Toe Box: AJ1 Low has a sleeker tapered toe profile; Dunk Low has a wider skate cupsole.\n• Heritage: AJ1 was Michael Jordan's 1985 signature sneaker; Dunk was built for 1985 college basketball.`;
+        details = `• Upper & Cushioning: Encapsulated responsive air cushioning with premium leather overlays.\n• Value: ${product?.name || "This pair"} (${formatPrice(product?.price)}) vs ${currentCompareOption?.name} (${currentCompareOption?.price || "₹5,999"}).`;
       }
 
       setTimeout(() => {
@@ -890,27 +1098,31 @@ export default function ProductPage({ params }) {
           },
         ]);
         setAiTyping(false);
-      }, 550);
+      }, 500);
       return;
     }
 
-    // 5. Daily use query
-    if (lower.includes("daily") || lower.includes("workout") || lower.includes("gym") || lower.includes("college")) {
+    // 7. Daily use query
+    if (lower.includes("daily") || lower.includes("workout") || lower.includes("gym") || lower.includes("college") || lower.includes("travel")) {
       setTimeout(() => {
         setAiChatMessages((prev) => [
           ...prev,
           {
             id: `ai-${Date.now()}`,
             sender: "ai",
-            text: `Yes! The ${product?.name || "Air Jordan 1 Low"} is engineered with lightweight foam and encapsulated Nike Air cushioning, making it exceptionally comfortable and durable for daily casual rotation and street wear.`,
+            text: isBagOrAccessory
+              ? `Yes! The ${product?.name || "Backpack"} is engineered for daily heavy-duty rotation, college classes, gym gear, and travel. Its ergonomic padded straps and air-mesh back paneling ensure zero shoulder fatigue even when carrying a 16" laptop and books.`
+              : isClothing
+              ? `Yes! The ${product?.name || "t-shirt"} is crafted from 100% breathable, sweat-wicking lightweight cotton jersey, making it ideal for daily casual rotation, college, and warm weather.`
+              : `Yes! The ${product?.name || "Sneaker"} is engineered with lightweight cushioning and durable rubber traction, making it exceptionally comfortable for daily street wear.`,
           },
         ]);
         setAiTyping(false);
-      }, 550);
+      }, 500);
       return;
     }
 
-    // 6. Generic / Custom Query -> Call real /api/ai/chat API
+    // 8. Generic / Custom Query -> Call real /api/ai/chat API
     try {
       const response = await fetch("/api/ai/chat", {
         method: "POST",
@@ -931,7 +1143,9 @@ export default function ProductPage({ params }) {
           {
             id: `ai-${Date.now()}`,
             sender: "ai",
-            text: data.reply || `The ${product?.name || "Air Jordan 1 Low"} is rated 4.8/5 by 234 verified buyers with a 98% fit confidence.`,
+            text:
+              data.reply ||
+              `The ${product?.name || "piece"} is rated 4.8/5 with high customer satisfaction for premium craftsmanship and verified durability.`,
             products: Array.isArray(data.products) && data.products.length > 0 ? data.products.slice(0, 3) : null,
           },
         ]);
@@ -944,7 +1158,7 @@ export default function ProductPage({ params }) {
         {
           id: `ai-${Date.now()}`,
           sender: "ai",
-          text: `The ${product?.name || "Air Jordan 1 Low"} features premium leather and responsive cushioning. Available in UK sizes 6-11 with a 98% fit confidence. Would you like me to select UK 9 for you?`,
+          text: `The ${product?.name || "piece"} is built with premium materials and high structural durability. Verified with a 4.8/5 rating. Would you like me to compare it with other options or check similar items in the catalog?`,
         },
       ]);
     } finally {
@@ -1004,7 +1218,7 @@ export default function ProductPage({ params }) {
           </Link>
           <span className="dark-crumb-arrow">&gt;</span>
           <span className="dark-crumb-active">
-            {product.subcategory || "Men's Sneakers"}
+            {product.subcategory || (isClothing ? "T-Shirts" : "Footwear")}
           </span>
         </nav>
 
@@ -1054,7 +1268,11 @@ export default function ProductPage({ params }) {
             <div className="dark-main-stage-card">
               {/* Vertical Watermark */}
               <div className="dark-stage-watermark">
-                {product.name ? product.name.toUpperCase() : "AIR JORDAN 1 LOW"}
+                {product.name
+                  ? product.name.toUpperCase()
+                  : isClothing
+                  ? "PREMIUM COTTON"
+                  : "PRIMENEST EXCLUSIVE"}
               </div>
 
               {/* Top-Right Floating Glass Action Pills */}
@@ -1162,7 +1380,9 @@ export default function ProductPage({ params }) {
             {/* Brand Eyebrow */}
             <div className="dark-brand-row">
               <span className="dark-brand-symbol">❖</span>
-              <span className="dark-brand-name">JORDAN</span>
+              <span className="dark-brand-name">
+                {product.brand || (isClothing ? "PRIMENEST APPAREL" : "PRIMENEST LUXURY")}
+              </span>
             </div>
 
             {/* Product Title */}
@@ -1185,96 +1405,114 @@ export default function ProductPage({ params }) {
               <div className="dark-price-sub">Inclusive of all taxes</div>
             </div>
 
-            {/* Product Short Description */}
-            <p className="dark-product-desc">
-              {product.description ||
-                "Inspired by the original Air Jordan 1, this sneaker combines timeless style, premium craftsmanship, and lightweight comfort for a versatile look that pairs effortlessly with any outfit."}
-            </p>
+            {/* Product Short Description (Clamped to 3 lines with Read all / Show less toggle) */}
+            {(() => {
+              const descText =
+                product.description ||
+                (isClothing
+                  ? "Crafted from 100% premium breathable cotton jersey, this piece delivers exceptional softness, all-day comfort, and an effortless silhouette for everyday styling."
+                  : "Inspired by timeless court heritage, this sneaker combines iconic style, premium craftsmanship, and lightweight comfort for a versatile look that pairs effortlessly with any outfit.");
+              const MAX_CHARS = 185;
+              const isLongDesc = descText.length > MAX_CHARS;
+              const displayText =
+                isLongDesc && !isDescExpanded
+                  ? `${descText.slice(0, MAX_CHARS).trim()}...`
+                  : descText;
 
-            {/* Color Swatches */}
-            <div className="dark-color-section">
-              <div className="dark-section-label">
-                Color: <strong>{selectedColor}</strong>
-              </div>
-              <div className="dark-color-swatches">
-                {colorSwatches.map((c) => {
-                  const isSelected = selectedColor === c.name;
-                  return (
+              return (
+                <div className="dark-product-desc-wrap">
+                  <p
+                    className={`dark-product-desc ${
+                      isLongDesc && !isDescExpanded ? "clamped" : "expanded"
+                    }`}
+                  >
+                    {displayText}
+                  </p>
+                  {isLongDesc && (
                     <button
-                      key={c.name}
                       type="button"
-                      className={`dark-color-swatch-btn ${isSelected ? "selected" : ""}`}
-                      onClick={() => setSelectedColor(c.name)}
-                      aria-label={`Select ${c.name}`}
-                      style={{
-                        backgroundColor: c.hex,
-                        boxShadow: isSelected ? `0 0 0 2px #0f121a, 0 0 0 4px ${c.ring}` : "none",
-                      }}
-                    />
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Size Section */}
-            <div className="dark-size-section">
-              <div className="dark-size-header">
-                <span className="dark-section-label">Size (UK/IN)</span>
-                <button
-                  type="button"
-                  className="dark-size-guide-link"
-                  onClick={() => setShowSizeGuide(true)}
-                >
-                  <Ruler size={13} />
-                  <span>Size Guide</span>
-                </button>
-              </div>
-
-              <div className="dark-size-chips-grid">
-                {variants.map((v) => {
-                  const isSelected = selectedVariant === v.label;
-                  return (
-                    <button
-                      key={v.label}
-                      type="button"
-                      className={`dark-size-chip ${isSelected ? "selected" : ""}`}
-                      onClick={() => setSelectedVariant(v.label)}
+                      className="dark-desc-toggle-btn"
+                      onClick={() => setIsDescExpanded((prev) => !prev)}
+                      aria-expanded={isDescExpanded}
                     >
-                      {v.label}
+                      {isDescExpanded ? (
+                        <>
+                          Show less <ChevronUp size={13} />
+                        </>
+                      ) : (
+                        <>
+                          Read all <ChevronDown size={13} />
+                        </>
+                      )}
                     </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* ✨ AI Size Recommendation Card (Emerald Card matching screenshot) */}
-            <div
-              className="dark-ai-size-card"
-              onClick={() => {
-                setSelectedVariant("UK 9");
-                toast.success("AI Recommendation: UK 9 auto-selected with 98% Fit Confidence ✨");
-              }}
-              title="Click to auto-select recommended size"
-            >
-              <div className="ai-size-left-icon">
-                <Smartphone size={16} />
-              </div>
-              <div className="ai-size-mid-text">
-                <div className="ai-size-title-row">
-                  <span className="ai-size-title">AI Size Recommendation</span>
-                  <span className="ai-size-recommended-pill">Recommended</span>
+                  )}
                 </div>
-                <div className="ai-size-sub">
-                  Based on your previous orders and similar customers.
+              );
+            })()}
+
+            {/* Color Swatches - Hide for T-Shirts / Shirts / Clothing */}
+            {!isClothing && isFootwear && (
+              <div className="dark-color-section">
+                <div className="dark-section-label">
+                  Color: <strong>{selectedColor}</strong>
+                </div>
+                <div className="dark-color-swatches">
+                  {colorSwatches.map((c) => {
+                    const isSelected = selectedColor === c.name;
+                    return (
+                      <button
+                        key={c.name}
+                        type="button"
+                        className={`dark-color-swatch-btn ${isSelected ? "selected" : ""}`}
+                        onClick={() => setSelectedColor(c.name)}
+                        aria-label={`Select ${c.name}`}
+                        style={{
+                          backgroundColor: c.hex,
+                          boxShadow: isSelected ? `0 0 0 2px #ffffff, 0 0 0 4px #b45309` : "none",
+                        }}
+                      />
+                    );
+                  })}
                 </div>
               </div>
-              <div className="ai-size-right-col">
-                <div className="ai-size-pick-label">UK 9 &gt;</div>
-                <div className="ai-size-pick-conf">98% Fit Confidence</div>
-              </div>
-            </div>
+            )}
 
-            {/* Action Buttons: Add to Bag & Buy Now */}
+            {/* Size Section - Only shown for clothing and footwear */}
+            {hasSizeSelection && (
+              <div className="dark-size-section">
+                <div className="dark-size-header">
+                  <span className="dark-section-label">
+                    {isClothing ? "Select Size" : "Size (UK/IN)"}
+                  </span>
+                  <button
+                    type="button"
+                    className="dark-size-guide-link"
+                    onClick={() => setShowSizeGuide(true)}
+                  >
+                    <Ruler size={13} />
+                    <span>Size Guide</span>
+                  </button>
+                </div>
+
+                <div className="dark-size-chips-grid">
+                  {variants.map((v) => {
+                    const isSelected = selectedVariant === v.label;
+                    return (
+                      <button
+                        key={v.label}
+                        type="button"
+                        className={`dark-size-chip ${isSelected ? "selected" : ""}`}
+                        onClick={() => setSelectedVariant(v.label)}
+                      >
+                        {v.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Action Buttons: Add to Bag & Buy Now (Symmetrically Aligned) */}
             <div className="dark-action-buttons-row">
               <button
                 type="button"
@@ -1282,7 +1520,7 @@ export default function ProductPage({ params }) {
                 onClick={handleAddToCart}
                 disabled={isOutOfStock}
               >
-                <ShoppingBag size={17} />
+                <ShoppingBag size={18} />
                 <span>{addedRecently ? "Added to Bag!" : "Add to Bag"}</span>
               </button>
 
@@ -1292,149 +1530,143 @@ export default function ProductPage({ params }) {
                 onClick={handleBuyNow}
                 disabled={isOutOfStock}
               >
-                <Zap size={17} fill="#0b0e14" />
+                <Zap size={18} fill="currentColor" />
                 <span>Buy Now</span>
               </button>
-            </div>
-
-            {/* Trust Badges Row */}
-            <div className="dark-trust-row">
-              <div className="dark-trust-item">
-                <RefreshCw size={13} />
-                <span>7-Day Return</span>
-              </div>
-              <div className="dark-trust-item">
-                <Truck size={13} />
-                <span>Free Delivery</span>
-              </div>
-              <div className="dark-trust-item">
-                <ShieldCheck size={13} />
-                <span>100% Authentic</span>
-              </div>
-              <div className="dark-trust-item">
-                <Lock size={13} />
-                <span>Secure Payment</span>
-              </div>
             </div>
           </div>
 
           {/* -----------------------------------------------------------------------
-              COLUMN 3: PrimeNest AI Stylist (Glowing Purple ChatGPT Panel)
+              COLUMN 3: PrimeNest AI Stylist (Modern Interactive & Animated Glass Concierge)
              ----------------------------------------------------------------------- */}
           <div className="dark-ai-stylist-panel">
+            {/* Ambient Animated Glow Aura */}
+            <div className="ai-stylist-ambient-glow" />
+
             {/* Stylist Header */}
             <div className="ai-stylist-header">
-              <div className="ai-stylist-icon-badge">
-                <Sparkles size={16} />
+              <div className="ai-stylist-avatar-wrap">
+                <div className="ai-stylist-icon-badge">
+                  <Sparkles size={18} />
+                </div>
+                <span className="ai-status-pulse-dot" title="Online Concierge" />
               </div>
-              <div>
-                <h3 className="ai-stylist-title">PrimeNest AI Stylist</h3>
-                <p className="ai-stylist-sub">Your personal shopping assistant</p>
+
+              <div className="ai-stylist-header-info">
+                <div className="ai-stylist-title-row">
+                  <h3 className="ai-stylist-title">PrimeNest AI Stylist</h3>
+                  <span className="ai-badge-pro">PRO 2.0</span>
+                </div>
+                <p className="ai-stylist-sub">Your personal luxury shopping concierge</p>
               </div>
+
+              <button
+                type="button"
+                className="ai-stylist-reset-btn"
+                onClick={handleResetAiChat}
+                title="Restart conversation"
+                aria-label="Restart conversation"
+              >
+                <RotateCcw size={14} />
+              </button>
             </div>
 
             {/* Chat Messages Body */}
             <div className="ai-stylist-chat-stream" ref={chatStreamRef}>
-              {aiChatMessages.map((msg) => (
-                <div
-                  key={msg.id}
-                  className={`ai-stylist-bubble ${
-                    msg.sender === "user" ? "user-bubble" : "ai-bubble"
-                  }`}
-                >
-                  <div className="ai-bubble-text">{msg.text}</div>
+              {aiChatMessages.map((msg) => {
+                const isUser = msg.sender === "user";
+                return (
+                  <div
+                    key={msg.id}
+                    className={`ai-message-row ${isUser ? "user-row" : "ai-row"}`}
+                  >
+                    {!isUser && (
+                      <div className="ai-avatar-tiny" aria-hidden="true">
+                        <Sparkles size={12} />
+                      </div>
+                    )}
 
-                  {/* Embedded product recommendations inside AI reply */}
-                  {msg.products && msg.products.length > 0 && (
-                    <div className="ai-chat-products-row">
-                      {msg.products.map((p) => (
-                        <Link
-                          key={p.id}
-                          href={`/product/${p.id}`}
-                          className="ai-mini-product-card"
-                        >
-                          <img src={p.image} alt={p.name} className="ai-mini-thumb" />
-                          <div className="ai-mini-details">
-                            <span className="ai-mini-name">{p.name}</span>
-                            <span className="ai-mini-price">{p.price}</span>
-                          </div>
-                          <span className="ai-mini-view-btn">View ↗</span>
-                        </Link>
-                      ))}
+                    <div className={`ai-bubble ${isUser ? "user-bubble" : "ai-bubble"}`}>
+                      <div className="ai-bubble-text">{msg.text}</div>
+
+                      {/* Embedded product recommendations inside AI reply */}
+                      {msg.products && msg.products.length > 0 && (
+                        <div className="ai-chat-products-row">
+                          {msg.products.map((p) => (
+                            <Link
+                              key={p.id}
+                              href={`/product/${p.id}`}
+                              className="ai-mini-product-card"
+                            >
+                              <img src={p.image} alt={p.name} className="ai-mini-thumb" />
+                              <div className="ai-mini-details">
+                                <span className="ai-mini-name">{p.name}</span>
+                                <span className="ai-mini-price">{p.price}</span>
+                              </div>
+                              <span className="ai-mini-view-btn">View ↗</span>
+                            </Link>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                  )}
-
-                </div>
-              ))}
+                  </div>
+                );
+              })}
 
               {aiTyping && (
-                <div className="ai-stylist-bubble ai-bubble ai-typing-bubble">
-                  <span className="typing-dot" />
-                  <span className="typing-dot" />
-                  <span className="typing-dot" />
+                <div className="ai-message-row ai-row">
+                  <div className="ai-avatar-tiny" aria-hidden="true">
+                    <Sparkles size={12} />
+                  </div>
+                  <div className="ai-bubble ai-bubble ai-typing-bubble">
+                    <span className="typing-dot" />
+                    <span className="typing-dot" />
+                    <span className="typing-dot" />
+                  </div>
                 </div>
               )}
             </div>
 
-            {/* 5 Quick Prompt Chips */}
-            <div className="ai-stylist-chips-stack">
-              <button
-                type="button"
-                className="ai-stylist-chip"
-                onClick={() => handleSendChatMessage("Is this good for daily use?")}
-              >
-                <Clock size={12} />
-                <span>Is this good for daily use?</span>
-              </button>
+            {/* Quick Prompt Chips (Category-Aware Interactive Carousel) */}
+            <div className="ai-stylist-chips-wrap">
+              <div className="ai-chips-scroll">
+                {quickPromptChips.map((chip, i) => {
+                  const ChipIcon = chip.icon;
+                  return (
+                    <button
+                      key={i}
+                      type="button"
+                      className="ai-stylist-chip"
+                      onClick={() => handleSendChatMessage(chip.query)}
+                    >
+                      <ChipIcon size={12} />
+                      <span>{chip.label}</span>
+                    </button>
+                  );
+                })}
 
-              <button
-                type="button"
-                className="ai-stylist-chip"
-                onClick={() => handleSendChatMessage("Show similar sneakers")}
-              >
-                <Sparkles size={12} />
-                <span>Show similar sneakers</span>
-              </button>
-
-              <button
-                type="button"
-                className="ai-stylist-chip"
-                onClick={() => handleSendChatMessage("Can I wear this with jeans?")}
-              >
-                <Shirt size={12} />
-                <span>Can I wear this with jeans?</span>
-              </button>
-
-              <button
-                type="button"
-                className="ai-stylist-chip"
-                onClick={() => handleSendChatMessage("Show cheaper options")}
-              >
-                <Tag size={12} />
-                <span>Show cheaper options</span>
-              </button>
-
-              <div className="ai-stylist-chip-compare-row">
-                <button
-                  type="button"
-                  className="ai-stylist-chip"
-                  onClick={() => handleSendChatMessage(`Compare with ${currentCompareOption.name}`)}
-                  title={`Compare ${product?.name || "AJ1"} with ${currentCompareOption.name}`}
-                >
-                  <Scale size={12} />
-                  <span>Compare with {currentCompareOption.name}</span>
-                </button>
-                <button
-                  type="button"
-                  className="ai-stylist-chip-switch-btn"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setCompareIndex((prev) => (prev + 1) % compareOptions.length);
-                  }}
-                  title="Switch comparison product option"
-                >
-                  ⇄ Switch
-                </button>
+                {/* Compare Chip with Quick Switcher */}
+                <div className="ai-stylist-chip-compare-group">
+                  <button
+                    type="button"
+                    className="ai-stylist-chip compare-btn"
+                    onClick={() => handleSendChatMessage(`Compare with ${currentCompareOption.name}`)}
+                  >
+                    <Scale size={12} />
+                    <span>Compare: {currentCompareOption.name}</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="ai-stylist-chip-switch-btn"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setCompareIndex((prev) => (prev + 1) % compareOptions.length);
+                    }}
+                    title="Switch comparison item"
+                  >
+                    ⇄
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -1448,9 +1680,10 @@ export default function ProductPage({ params }) {
             >
               <input
                 type="text"
-                placeholder="Ask anything about this product..."
+                placeholder="Ask concierge anything about this piece..."
                 value={inPageQuery}
                 onChange={(e) => setInPageQuery(e.target.value)}
+                aria-label="Ask AI concierge"
               />
               <button
                 type="submit"
@@ -1458,205 +1691,9 @@ export default function ProductPage({ params }) {
                 disabled={!inPageQuery.trim()}
                 aria-label="Send query"
               >
-                <Send size={13} />
+                <Send size={14} />
               </button>
             </form>
-          </div>
-        </section>
-
-        {/* =========================================================================
-            3. MIDDLE SECTION: 3 FEATURE CARDS SUITE (Side-by-Side)
-           ========================================================================= */}
-        <section className="dark-middle-suite-grid">
-          {/* Card 1: Virtual On-Foot Try On (Temporarily disabled: Virtual Try-On)
-          <div className="dark-feature-card dark-tryon-card">
-            <div className="tryon-card-media">
-              <img
-                src="https://i.pinimg.com/736x/9b/29/97/9b29978c7b3a5fa521f50262ab031f7c.jpg"
-                alt="On Foot Try On"
-              />
-            </div>
-            <div className="tryon-card-content">
-              <h4 className="suite-card-title">Virtual On-Foot Try On</h4>
-              <p className="suite-card-sub">
-                See how these shoes look on your feet using AI.
-              </p>
-              <button
-                type="button"
-                className="suite-btn-action"
-                onClick={() => setIsTryOnOpen(true)}
-              >
-                <Camera size={13} />
-                <span>Try On Now</span>
-              </button>
-            </div>
-            <button
-              type="button"
-              className="suite-arrow-btn"
-              onClick={() => setIsTryOnOpen(true)}
-              aria-label="Launch try on"
-            >
-              <ChevronRight size={16} />
-            </button>
-          </div>
-          */}
-
-          {/* Card 2: Complete the Look */}
-          <div id="complete-the-look-section" className="dark-feature-card dark-outfit-card">
-            <div className="outfit-card-header">
-              <h4 className="suite-card-title">Complete the Look</h4>
-              <span className="outfit-card-badge">✨ 3-Piece Bundle</span>
-            </div>
-            <div
-              className="outfit-items-row"
-              onClick={() => setIsOutfitModalOpen(true)}
-              title="Click to preview outfit & pick sizes"
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  setIsOutfitModalOpen(true);
-                }
-              }}
-            >
-              <div className="outfit-item-thumb">
-                <img src={currentImage} alt="Sneaker" />
-              </div>
-              <span className="outfit-plus">+</span>
-              <div className="outfit-item-thumb">
-                <img
-                  src="https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=400&q=80"
-                  alt="Denim Jeans"
-                />
-              </div>
-              <span className="outfit-plus">+</span>
-              <div className="outfit-item-thumb">
-                <img
-                  src="https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=400&q=80"
-                  alt="Tee and Cap"
-                />
-              </div>
-            </div>
-            <button
-              type="button"
-              className="suite-btn-complete-outfit"
-              onClick={() => setIsOutfitModalOpen(true)}
-            >
-              <span>Buy Complete Outfit</span>
-              <ArrowUpRight size={14} />
-            </button>
-          </div>
-
-          {/* Card 3: AI Insights */}
-          <div className="dark-feature-card dark-insights-card">
-            <h4 className="suite-card-title">AI Insights</h4>
-            <div className="insights-stats-grid">
-              <div className="insight-stat-tile">
-                <div className="insight-stat-icon gold-heart">💛</div>
-                <div className="insight-stat-num">95%</div>
-                <div className="insight-stat-label">Style Match</div>
-              </div>
-
-              <div className="insight-stat-tile">
-                <div className="insight-stat-icon teal-return">↻</div>
-                <div className="insight-stat-num">2%</div>
-                <div className="insight-stat-label">Return Rate</div>
-              </div>
-
-              <div className="insight-stat-tile">
-                <div className="insight-stat-icon gold-star">★</div>
-                <div className="insight-stat-num">4.8/5</div>
-                <div className="insight-stat-label">Customer Rating</div>
-              </div>
-
-              <div className="insight-stat-tile">
-                <div className="insight-stat-icon purple-trending">#4</div>
-                <div className="insight-stat-num">Trending</div>
-                <div className="insight-stat-label">This Week</div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* =========================================================================
-            4. BOTTOM SECTION: TABS & RECOMMENDED PRODUCTS GRID
-           ========================================================================= */}
-        <section id="bottom-tabs-section" className="dark-bottom-recommendations-section">
-          {/* Header & Tabs */}
-          <div className="dark-tabs-header-row">
-            <div className="dark-recommend-tabs">
-              {[
-                "Recommended by AI",
-                "Similar Products",
-                "You May Also Like",
-                "Recently Viewed",
-              ].map((tab) => (
-                <button
-                  key={tab}
-                  type="button"
-                  className={`dark-tab-item ${activeBottomTab === tab ? "active" : ""}`}
-                  onClick={() => {
-                    setActiveBottomTab(tab);
-                    toast.success(`Showing ${tab} ✨`);
-                  }}
-                >
-                  {tab}
-                </button>
-              ))}
-            </div>
-
-            <Link href="/shop?category=Footwear" className="dark-viewall-link">
-              <span>View All</span>
-              <ArrowUpRight size={14} />
-            </Link>
-          </div>
-
-          {/* Dynamic Product Cards Grid based on selected tab */}
-          <div className="dark-products-carousel-row" key={activeBottomTab}>
-            {currentTabProducts.map((item) => {
-              const isItemWishlisted = wishlist.some((w) => w.id === item.id);
-              return (
-                <div key={item.id} className="dark-sneaker-card">
-                  {/* Category / AI Tag */}
-                  {item.badge && (
-                    <span className="sneaker-card-badge">{item.badge}</span>
-                  )}
-
-                  {/* Top Heart Icon */}
-                  <button
-                    type="button"
-                    className="sneaker-card-heart"
-                    onClick={() => toggleWishlist(item)}
-                    aria-label="Wishlist item"
-                  >
-                    <Heart
-                      size={15}
-                      fill={isItemWishlisted ? "#e11d48" : "none"}
-                      color={isItemWishlisted ? "#e11d48" : "#8b949e"}
-                    />
-                  </button>
-
-                  {/* Sneaker Image */}
-                  <Link href={`/product/${item.id}`} className="sneaker-card-img-wrap">
-                    <img src={item.image} alt={item.name} loading="lazy" />
-                  </Link>
-
-                  {/* Sneaker Info */}
-                  <div className="sneaker-card-info">
-                    <Link href={`/product/${item.id}`} className="sneaker-card-title">
-                      {item.name}
-                    </Link>
-                    <div className="sneaker-card-bottom">
-                      <span className="sneaker-card-price">{formatPrice(item.price)}</span>
-                      <div className="sneaker-card-rating">
-                        <Star size={12} fill="#f59e0b" color="#f59e0b" />
-                        <span>{item.rating || 4.8}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
           </div>
         </section>
 
@@ -1750,7 +1787,7 @@ export default function ProductPage({ params }) {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="size-guide-header">
-              <h3>Footwear Sizing Chart</h3>
+              <h3>{isClothing ? "T-Shirt & Shirt Size Chart" : "Footwear Sizing Chart"}</h3>
               <button
                 type="button"
                 className="guide-close-btn"
@@ -1760,244 +1797,122 @@ export default function ProductPage({ params }) {
               </button>
             </div>
             <p className="size-guide-intro">
-              Universal sizing matrix for Nike, Jordan & sneaker silhouettes:
+              {isClothing
+                ? "Standard body & garment measurements in inches & cm for regular, relaxed & oversized fit tees:"
+                : "Universal sizing matrix for sneaker & footwear silhouettes:"}
             </p>
-            <table className="dark-size-table">
-              <thead>
-                <tr>
-                  <th>UK / India</th>
-                  <th>US Men</th>
-                  <th>EU</th>
-                  <th>Foot Length</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td><strong>UK 6</strong></td>
-                  <td>US 7</td>
-                  <td>40</td>
-                  <td>25.0 cm</td>
-                </tr>
-                <tr>
-                  <td><strong>UK 7</strong></td>
-                  <td>US 8</td>
-                  <td>41</td>
-                  <td>25.5 cm</td>
-                </tr>
-                <tr>
-                  <td><strong>UK 8</strong></td>
-                  <td>US 9</td>
-                  <td>42.5</td>
-                  <td>26.5 cm</td>
-                </tr>
-                <tr className="recommended-row">
-                  <td><strong>UK 9 ✨ (Recommended)</strong></td>
-                  <td>US 10</td>
-                  <td>44</td>
-                  <td>27.5 cm</td>
-                </tr>
-                <tr>
-                  <td><strong>UK 10</strong></td>
-                  <td>US 11</td>
-                  <td>45</td>
-                  <td>28.5 cm</td>
-                </tr>
-                <tr>
-                  <td><strong>UK 11</strong></td>
-                  <td>US 12</td>
-                  <td>46</td>
-                  <td>29.5 cm</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
 
-      {/* =========================================================================
-          COMPLETE THE LOOK OUTFIT CUSTOMIZATION & BUY MODAL
-         ========================================================================= */}
-      {isOutfitModalOpen && (
-        <div
-          className="dark-outfit-modal-backdrop"
-          onClick={() => setIsOutfitModalOpen(false)}
-        >
-          <div
-            className="dark-outfit-modal"
-            onClick={(e) => e.stopPropagation()}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="outfit-modal-title"
-          >
-            {/* Modal Header */}
-            <div className="dark-outfit-modal-header">
-              <div className="outfit-modal-title-group">
-                <div className="outfit-modal-pill">
-                  <Sparkles size={13} className="text-amber-400" />
-                  <span>AI Curated 3-Piece Ensemble</span>
+            {isClothing ? (
+              <>
+                <table className="dark-size-table">
+                  <thead>
+                    <tr>
+                      <th>Size</th>
+                      <th>Chest (Inches)</th>
+                      <th>Length (Inches)</th>
+                      <th>Shoulder (Inches)</th>
+                      <th>Chest (cm)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><strong>XS</strong></td>
+                      <td>36 in</td>
+                      <td>26.5 in</td>
+                      <td>16.5 in</td>
+                      <td>91 cm</td>
+                    </tr>
+                    <tr>
+                      <td><strong>S</strong></td>
+                      <td>38 in</td>
+                      <td>27.5 in</td>
+                      <td>17.5 in</td>
+                      <td>96 cm</td>
+                    </tr>
+                    <tr>
+                      <td><strong>M</strong></td>
+                      <td>40 in</td>
+                      <td>28.5 in</td>
+                      <td>18.5 in</td>
+                      <td>102 cm</td>
+                    </tr>
+                    <tr className="recommended-row">
+                      <td><strong>L ✨ (Recommended)</strong></td>
+                      <td>42 in</td>
+                      <td>29.5 in</td>
+                      <td>19.5 in</td>
+                      <td>107 cm</td>
+                    </tr>
+                    <tr>
+                      <td><strong>XL</strong></td>
+                      <td>44 in</td>
+                      <td>30.5 in</td>
+                      <td>20.5 in</td>
+                      <td>112 cm</td>
+                    </tr>
+                    <tr>
+                      <td><strong>XXL</strong></td>
+                      <td>46 in</td>
+                      <td>31.5 in</td>
+                      <td>21.5 in</td>
+                      <td>117 cm</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <div style={{ marginTop: "14px", padding: "10px 14px", background: "#fffbeb", border: "1px solid #fde68a", borderRadius: "10px", fontSize: "12px", color: "#92400e" }}>
+                  💡 <strong>Fit Tip:</strong> For modern relaxed or oversized fit streetwear, choose your standard size. For an athletic slim fit, consider sizing one step down.
                 </div>
-                <h3 id="outfit-modal-title" className="outfit-modal-heading">
-                  Complete the Look
-                </h3>
-                <p className="outfit-modal-subtitle">
-                  Inspect each piece, pick your sizes, and review bundle pricing before adding to your bag.
-                </p>
-              </div>
-              <button
-                type="button"
-                className="outfit-modal-close-btn"
-                onClick={() => setIsOutfitModalOpen(false)}
-                aria-label="Close outfit preview"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            {/* Modal Scrollable Items List */}
-            <div className="dark-outfit-items-list">
-              {outfitPieces.map((piece) => {
-                const isSelected = outfitSelectedItems[piece.key];
-                const currentSize = outfitSizes[piece.key];
-
-                return (
-                  <div
-                    key={piece.key}
-                    className={`dark-outfit-piece-card ${
-                      isSelected ? "is-selected" : "is-deselected"
-                    }`}
-                  >
-                    {/* Item Top Row */}
-                    <div className="outfit-piece-top">
-                      <label
-                        className="outfit-checkbox-container"
-                        title="Include/Exclude this item"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={(e) => {
-                            setOutfitSelectedItems((prev) => ({
-                              ...prev,
-                              [piece.key]: e.target.checked,
-                            }));
-                          }}
-                        />
-                        <span className="outfit-checkbox-custom">
-                          {isSelected && <Check size={13} strokeWidth={3} />}
-                        </span>
-                      </label>
-
-                      <div className="outfit-piece-image-wrap">
-                        <img src={piece.image} alt={piece.name} />
-                        <span className="outfit-piece-tag">{piece.tag}</span>
-                      </div>
-
-                      <div className="outfit-piece-info">
-                        <div className="outfit-piece-meta">
-                          <span className="outfit-piece-cat">{piece.category}</span>
-                          <span className="outfit-piece-price">
-                            ₹{piece.price.toLocaleString("en-IN")}
-                          </span>
-                        </div>
-                        <h4 className="outfit-piece-title">{piece.name}</h4>
-                        <p className="outfit-piece-desc">{piece.desc}</p>
-                      </div>
-                    </div>
-
-                    {/* Size Selector Section */}
-                    {isSelected && (
-                      <div className="outfit-piece-size-section">
-                        <div className="outfit-size-header">
-                          <span className="outfit-size-title">
-                            {piece.sizeType}:
-                          </span>
-                          <span className="outfit-size-current">
-                            Selected: <strong>{currentSize}</strong>
-                          </span>
-                        </div>
-
-                        <div className="outfit-size-pills-row">
-                          {piece.sizes.map((size) => {
-                            const active = currentSize === size;
-                            return (
-                              <button
-                                key={size}
-                                type="button"
-                                className={`outfit-size-btn ${active ? "active" : ""}`}
-                                onClick={() => {
-                                  setOutfitSizes((prev) => ({
-                                    ...prev,
-                                    [piece.key]: size,
-                                  }));
-                                }}
-                              >
-                                {size}
-                                {active && <Check size={11} className="outfit-size-check" />}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Modal Bottom / Summary & Action Bar */}
-            <div className="dark-outfit-modal-footer">
-              <div className="outfit-footer-summary">
-                <div className="outfit-summary-badges">
-                  {outfitPricing.isFullBundle ? (
-                    <span className="outfit-discount-tag">
-                      🏷️ 10% Bundle Discount Applied (-₹{outfitPricing.discountAmount.toLocaleString("en-IN")})
-                    </span>
-                  ) : (
-                    <span className="outfit-selection-tag">
-                      {outfitPricing.selectedCount} of 3 Items Selected
-                    </span>
-                  )}
-                  <span className="outfit-delivery-tag">
-                    <Truck size={12} /> Free Express Delivery
-                  </span>
-                </div>
-
-                <div className="outfit-total-price-box">
-                  <span className="outfit-total-label">Total Outfit Price:</span>
-                  <div className="outfit-price-numbers">
-                    {outfitPricing.discountAmount > 0 && (
-                      <span className="outfit-original-price">
-                        ₹{outfitPricing.originalTotal.toLocaleString("en-IN")}
-                      </span>
-                    )}
-                    <span className="outfit-final-price">
-                      ₹{outfitPricing.finalTotal.toLocaleString("en-IN")}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="outfit-footer-actions">
-                <button
-                  type="button"
-                  className="outfit-btn-add-bag"
-                  onClick={() => handleConfirmOutfitCart({ checkout: false })}
-                  disabled={outfitPricing.selectedCount === 0}
-                >
-                  <ShoppingBag size={17} />
-                  <span>Add Outfit to Bag</span>
-                </button>
-                <button
-                  type="button"
-                  className="outfit-btn-buy-now"
-                  onClick={() => handleConfirmOutfitCart({ checkout: true })}
-                  disabled={outfitPricing.selectedCount === 0}
-                >
-                  <Zap size={17} />
-                  <span>Buy Now ⚡</span>
-                </button>
-              </div>
-            </div>
+              </>
+            ) : (
+              <table className="dark-size-table">
+                <thead>
+                  <tr>
+                    <th>UK / India</th>
+                    <th>US Men</th>
+                    <th>EU</th>
+                    <th>Foot Length</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>UK 6</strong></td>
+                    <td>US 7</td>
+                    <td>40</td>
+                    <td>25.0 cm</td>
+                  </tr>
+                  <tr>
+                    <td><strong>UK 7</strong></td>
+                    <td>US 8</td>
+                    <td>41</td>
+                    <td>25.5 cm</td>
+                  </tr>
+                  <tr>
+                    <td><strong>UK 8</strong></td>
+                    <td>US 9</td>
+                    <td>42.5</td>
+                    <td>26.5 cm</td>
+                  </tr>
+                  <tr className="recommended-row">
+                    <td><strong>UK 9 ✨ (Recommended)</strong></td>
+                    <td>US 10</td>
+                    <td>44</td>
+                    <td>27.5 cm</td>
+                  </tr>
+                  <tr>
+                    <td><strong>UK 10</strong></td>
+                    <td>US 11</td>
+                    <td>45</td>
+                    <td>28.5 cm</td>
+                  </tr>
+                  <tr>
+                    <td><strong>UK 11</strong></td>
+                    <td>US 12</td>
+                    <td>46</td>
+                    <td>29.5 cm</td>
+                  </tr>
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
       )}
