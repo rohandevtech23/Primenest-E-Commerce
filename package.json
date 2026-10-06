@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "db:setup": "node scripts/setup-db.mjs",
-    "db:seed": "node scripts/seed-rich-catalog.mjs"
+    "db:seed": "node scripts/seed-rich-catalog.mjs",
+    "db:init": "node scripts/setup-db.mjs && node scripts/seed-rich-catalog.mjs && node scripts/seed-analytics-orders.mjs"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
